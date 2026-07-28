@@ -1,0 +1,36 @@
+{
+  "name": "builds-and-boarding-passes",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Interactive companion platform for the Builds & Boarding Passes livestream and virtual World Tour.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/whereintheworldisgillian/builds-and-boarding-passes.git"
+  },
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "next": "^16.2.12",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/node": "^26.1.2",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.2.12",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^6.0.3"
+  },
+  "overrides": {
+    "sharp": "^0.35.3",
+    "postcss": "^8.5.24"
+  }
+}

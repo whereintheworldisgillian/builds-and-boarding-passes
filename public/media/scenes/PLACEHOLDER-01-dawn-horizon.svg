@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PLACEHOLDER HERO SCENE 01 — "Dawn horizon"
+  Temporary artwork. Replace with a real still frame from your footage.
+  See content/hero-scenes.ts for how to swap this out.
+
+  Built from gradients only — no filters, no raster data, no blur passes —
+  so it costs essentially nothing to paint at full-screen size.
+
+  Every soft shape is a userSpaceOnUse radial gradient painted onto a
+  full-canvas rect, never onto a shape of its own. Painting a fading
+  gradient onto an ellipse leaves that ellipse's edge visible wherever the
+  gradient has not already reached zero, which shows up as a hard disc.
+  Multi-stop falloffs keep the fades free of banding.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" role="presentation">
+  <defs>
+    <linearGradient id="d-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#151d2a"/>
+      <stop offset="20%"  stop-color="#243040"/>
+      <stop offset="38%"  stop-color="#40404b"/>
+      <stop offset="52%"  stop-color="#6b4c43"/>
+      <stop offset="62%"  stop-color="#9c6442"/>
+      <stop offset="69%"  stop-color="#c98a54"/>
+      <stop offset="74%"  stop-color="#e0a86c"/>
+      <stop offset="78%"  stop-color="#b87a4c"/>
+      <stop offset="100%" stop-color="#3a2a22"/>
+    </linearGradient>
+
+    <!-- Low, wide sun glow. Squashed vertically via gradientTransform. -->
+    <radialGradient id="d-glow" gradientUnits="userSpaceOnUse"
+      cx="1250" cy="792" r="880"
+      gradientTransform="translate(1250,792) scale(1,0.46) translate(-1250,-792)">
+      <stop offset="0%"   stop-color="#ffdcaa" stop-opacity="0.82"/>
+      <stop offset="10%"  stop-color="#fcc98d" stop-opacity="0.64"/>
+      <stop offset="22%"  stop-color="#efaf72" stop-opacity="0.45"/>
+      <stop offset="36%"  stop-color="#dd9560" stop-opacity="0.29"/>
+      <stop offset="52%"  stop-color="#cd8353" stop-opacity="0.17"/>
+      <stop offset="70%"  stop-color="#c07a4d" stop-opacity="0.08"/>
+      <stop offset="85%"  stop-color="#b8734a" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#b8734a" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Broad atmospheric haze sitting along the horizon. -->
+    <radialGradient id="d-haze" gradientUnits="userSpaceOnUse"
+      cx="960" cy="768" r="1360"
+      gradientTransform="translate(960,768) scale(1,0.34) translate(-960,-768)">
+      <stop offset="0%"   stop-color="#e9b585" stop-opacity="0.26"/>
+      <stop offset="25%"  stop-color="#dda878" stop-opacity="0.17"/>
+      <stop offset="50%"  stop-color="#cf9a6c" stop-opacity="0.09"/>
+      <stop offset="75%"  stop-color="#c98a5c" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#c98a5c" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="d-water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#9c6a44"/>
+      <stop offset="10%"  stop-color="#5f4433"/>
+      <stop offset="34%"  stop-color="#332824"/>
+      <stop offset="70%"  stop-color="#1d1817"/>
+      <stop offset="100%" stop-color="#141110"/>
+    </linearGradient>
+
+    <!-- Reflected light on the water, directly beneath the glow. -->
+    <radialGradient id="d-reflect" gradientUnits="userSpaceOnUse"
+      cx="1250" cy="742" r="520"
+      gradientTransform="translate(1250,742) scale(1,0.72) translate(-1250,-742)">
+      <stop offset="0%"   stop-color="#f5be86" stop-opacity="0.40"/>
+      <stop offset="20%"  stop-color="#e8a870" stop-opacity="0.27"/>
+      <stop offset="45%"  stop-color="#d8925d" stop-opacity="0.14"/>
+      <stop offset="72%"  stop-color="#cc864f" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#cc864f" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="d-land" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#3d2f2a"/>
+      <stop offset="100%" stop-color="#241b19"/>
+    </linearGradient>
+
+    <!-- Corner vignette. Gentle, and started early so it has no visible ring. -->
+    <radialGradient id="d-vig" gradientUnits="userSpaceOnUse"
+      cx="960" cy="540" r="1180"
+      gradientTransform="translate(960,540) scale(1,0.62) translate(-960,-540)">
+      <stop offset="0%"   stop-color="#000000" stop-opacity="0"/>
+      <stop offset="45%"  stop-color="#000000" stop-opacity="0.04"/>
+      <stop offset="70%"  stop-color="#000000" stop-opacity="0.16"/>
+      <stop offset="88%"  stop-color="#000000" stop-opacity="0.31"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.44"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#d-sky)"/>
+  <rect width="1920" height="1080" fill="url(#d-haze)"/>
+  <rect width="1920" height="1080" fill="url(#d-glow)"/>
+
+  <!-- Distant headlands: low and wide, so they read as land rather than peaks. -->
+  <path d="M0 742 L96 728 L188 736 L268 720 L352 731 L436 723 L512 738 L590 733 L648 742 Z" fill="url(#d-land)" opacity="0.92"/>
+  <path d="M1452 742 L1524 729 L1602 737 L1688 718 L1774 730 L1856 722 L1920 733 L1920 742 Z" fill="url(#d-land)" opacity="0.92"/>
+
+  <!-- Water. -->
+  <rect y="742" width="1920" height="338" fill="url(#d-water)"/>
+  <rect y="742" width="1920" height="338" fill="url(#d-reflect)"/>
+
+  <rect width="1920" height="1080" fill="url(#d-vig)"/>
+</svg>

@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PLACEHOLDER HERO SCENE 03 — "Night harbour"
+  Temporary artwork. Replace with a real still frame from your footage.
+  See content/hero-scenes.ts for how to swap this out.
+
+  Built from gradients only — no filters, no raster data, no blur passes.
+  The shore lights are tiny dots at varied opacity; every soft glow is a
+  userSpaceOnUse radial gradient painted on a full-canvas rect, so no shape
+  edge shows through where the gradient has not yet faded to zero.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" role="presentation">
+  <defs>
+    <linearGradient id="n-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#121a26"/>
+      <stop offset="26%"  stop-color="#1b2634"/>
+      <stop offset="48%"  stop-color="#28323d"/>
+      <stop offset="64%"  stop-color="#3d4048"/>
+      <stop offset="74%"  stop-color="#6a5647"/>
+      <stop offset="80%"  stop-color="#8d6b4c"/>
+      <stop offset="100%" stop-color="#2b2320"/>
+    </linearGradient>
+
+    <!-- Warm light pollution sitting along the far shore. -->
+    <radialGradient id="n-glow" gradientUnits="userSpaceOnUse"
+      cx="960" cy="780" r="1180"
+      gradientTransform="translate(960,780) scale(1,0.36) translate(-960,-780)">
+      <stop offset="0%"   stop-color="#f5c895" stop-opacity="0.44"/>
+      <stop offset="14%"  stop-color="#e8b483" stop-opacity="0.33"/>
+      <stop offset="32%"  stop-color="#d59d6d" stop-opacity="0.21"/>
+      <stop offset="54%"  stop-color="#c48a5c" stop-opacity="0.11"/>
+      <stop offset="78%"  stop-color="#b57c51" stop-opacity="0.04"/>
+      <stop offset="100%" stop-color="#b57c51" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="n-water" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#4a3a2e"/>
+      <stop offset="14%"  stop-color="#2b2521"/>
+      <stop offset="46%"  stop-color="#1a1817"/>
+      <stop offset="100%" stop-color="#101011"/>
+    </linearGradient>
+
+    <radialGradient id="n-reflect" gradientUnits="userSpaceOnUse"
+      cx="940" cy="786" r="700"
+      gradientTransform="translate(940,786) scale(1,0.62) translate(-940,-786)">
+      <stop offset="0%"   stop-color="#eeb886" stop-opacity="0.30"/>
+      <stop offset="22%"  stop-color="#dda673" stop-opacity="0.20"/>
+      <stop offset="48%"  stop-color="#cc9260" stop-opacity="0.10"/>
+      <stop offset="76%"  stop-color="#c08853" stop-opacity="0.03"/>
+      <stop offset="100%" stop-color="#c08853" stop-opacity="0"/>
+    </radialGradient>
+
+    <linearGradient id="n-shore" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2724"/><stop offset="100%" stop-color="#161413"/>
+    </linearGradient>
+
+    <radialGradient id="n-vig" gradientUnits="userSpaceOnUse"
+      cx="960" cy="540" r="1180"
+      gradientTransform="translate(960,540) scale(1,0.62) translate(-960,-540)">
+      <stop offset="0%"   stop-color="#000000" stop-opacity="0"/>
+      <stop offset="45%"  stop-color="#000000" stop-opacity="0.05"/>
+      <stop offset="70%"  stop-color="#000000" stop-opacity="0.18"/>
+      <stop offset="88%"  stop-color="#000000" stop-opacity="0.33"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.46"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#n-sky)"/>
+  <rect width="1920" height="1080" fill="url(#n-glow)"/>
+
+  <!-- Far shoreline. -->
+  <path d="M0 754 L260 738 L520 760 L760 728 L1020 756 L1280 732 L1540 758 L1780 736 L1920 752 L1920 786 L0 786 Z" fill="url(#n-shore)"/>
+
+  <!-- Scattered shore lights: irregular spacing, varied brightness. -->
+  <g fill="#ffd7a8">
+    <circle cx="88"   cy="748" r="2.4" opacity="0.80"/>
+    <circle cx="154"  cy="744" r="1.8" opacity="0.52"/>
+    <circle cx="240"  cy="740" r="2.6" opacity="0.85"/>
+    <circle cx="306"  cy="746" r="1.6" opacity="0.46"/>
+    <circle cx="420"  cy="754" r="2.4" opacity="0.72"/>
+    <circle cx="488"  cy="750" r="1.8" opacity="0.56"/>
+    <circle cx="598"  cy="742" r="2.8" opacity="0.88"/>
+    <circle cx="670"  cy="734" r="1.6" opacity="0.50"/>
+    <circle cx="744"  cy="730" r="3.0" opacity="0.92"/>
+    <circle cx="828"  cy="740" r="1.8" opacity="0.60"/>
+    <circle cx="916"  cy="750" r="2.4" opacity="0.76"/>
+    <circle cx="990"  cy="746" r="1.6" opacity="0.50"/>
+    <circle cx="1076" cy="738" r="2.6" opacity="0.82"/>
+    <circle cx="1158" cy="744" r="1.8" opacity="0.56"/>
+    <circle cx="1250" cy="734" r="3.0" opacity="0.88"/>
+    <circle cx="1334" cy="742" r="1.6" opacity="0.50"/>
+    <circle cx="1428" cy="752" r="2.4" opacity="0.72"/>
+    <circle cx="1510" cy="748" r="1.8" opacity="0.60"/>
+    <circle cx="1604" cy="740" r="2.6" opacity="0.82"/>
+    <circle cx="1692" cy="734" r="1.6" opacity="0.50"/>
+    <circle cx="1790" cy="742" r="2.4" opacity="0.74"/>
+    <circle cx="1864" cy="748" r="1.8" opacity="0.52"/>
+  </g>
+
+  <!-- Water and its reflected light. -->
+  <rect y="786" width="1920" height="294" fill="url(#n-water)"/>
+  <rect y="786" width="1920" height="294" fill="url(#n-reflect)"/>
+
+  <rect width="1920" height="1080" fill="url(#n-vig)"/>
+</svg>

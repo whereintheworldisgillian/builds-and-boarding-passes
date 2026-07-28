@@ -1,0 +1,264 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   BUILDS & BOARDING PASSES — DESIGN TOKENS
+   --------------------------------------------------------------------------
+   Everything visual in this project resolves back to a token below.
+   No component hardcodes a colour, radius, shadow or spacing value.
+
+   >> TO RE-THEME THE ENTIRE SITE, EDIT THIS BLOCK ONLY. <<
+
+   Tailwind v4 turns each token into a utility automatically, so
+   --color-ink becomes `text-ink`, --spacing-section becomes `py-section`,
+   --shadow-soft becomes `shadow-soft`, and so on.
+
+   The palette is deliberately a "cinematic neutral" foundation: warm near
+   black, off-white text, muted grey secondary text, translucent surfaces —
+   with ONE restrained accent. The hero media supplies most of the colour,
+   so the interface stays quiet underneath it.
+   ========================================================================== */
+
+@theme {
+  /* --- Canvas / surfaces ----------------------------------------------- */
+  /* Warm near-black rather than pure black: reads filmic, not "dark mode". */
+  --color-canvas: #0c0b0a;
+  --color-canvas-raised: #131110;
+
+  /* Translucent surfaces — work layered over media or over the canvas. */
+  --color-surface: rgb(255 255 255 / 0.04);
+  --color-surface-strong: rgb(255 255 255 / 0.07);
+  --color-scrim: rgb(10 9 8 / 0.72);
+
+  /* --- Ink (text) ------------------------------------------------------ */
+  /* Contrast against --color-canvas / --color-canvas-raised, in order:
+     17.5 / 16.7, 7.5 / 7.2, 5.0 / 4.8. All clear WCAG AA (4.5) for normal
+     text, which matters because ink-faint carries the small eyebrow labels.
+     Darken any of these and re-check before shipping. */
+  --color-ink: #f4f1ec; /* off-white, never pure #fff */
+  --color-ink-muted: #a49f98; /* muted neutral secondary */
+  --color-ink-faint: #868076; /* labels, eyebrows, meta */
+
+  /* --- Accent -----------------------------------------------------------
+     TEMPORARY ACCENT — muted ember / clay.
+     This is the single source of truth for the accent colour. Change the
+     values here and the whole site follows: buttons, focus rings, the route
+     line, stamps, the current-stop marker, link hovers.
+
+     Alternatives to try if ember does not land:
+       teal slate  --color-accent: #4f8f8a;  --color-accent-hover: #5da29c;
+       dusty blue  --color-accent: #5b7fa6;  --color-accent-hover: #6a90b8;
+       sage        --color-accent: #7d9068;  --color-accent-hover: #8da077;
+     Keep --color-accent-contrast dark enough to read on whatever you pick.
+  ------------------------------------------------------------------------ */
+  --color-accent: #c96a45;
+  --color-accent-hover: #d97c56;
+  --color-accent-contrast: #17100c; /* text placed ON the accent */
+  --color-accent-soft: rgb(201 106 69 / 0.14); /* tinted fills */
+  --color-accent-line: rgb(201 106 69 / 0.42); /* tinted borders */
+
+  /* --- Lines ----------------------------------------------------------- */
+  --color-line: rgb(255 255 255 / 0.09);
+  --color-line-strong: rgb(255 255 255 / 0.16);
+
+  /* --- Radius ---------------------------------------------------------- */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.625rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.5rem;
+
+  /* --- Shadows --------------------------------------------------------- */
+  --shadow-soft: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.22);
+  --shadow-lifted: 0 2px 4px rgb(0 0 0 / 0.32), 0 24px 60px rgb(0 0 0 / 0.4);
+
+  /* --- Typography -------------------------------------------------------
+     Families are injected by next/font in app/layout.tsx and land on these
+     variables. Swapping typefaces means editing layout.tsx only.
+  ------------------------------------------------------------------------ */
+  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+
+  /* --- Layout ----------------------------------------------------------- */
+  --spacing-content: 75rem; /* 1200px max content width */
+  --spacing-section: 7.5rem; /* vertical rhythm between sections */
+
+  /* --- Motion ------------------------------------------------------------
+     Slow and intentional. Nothing here is springy or bouncy.
+  ------------------------------------------------------------------------ */
+  --ease-cinematic: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ==========================================================================
+   BASE
+   ========================================================================== */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Anchor targets clear the fixed header. */
+    scroll-padding-top: 6rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Visible, consistent focus on every interactive element. Uses the accent
+     so it reads as designed rather than as a browser default. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Media here is decorative; never let it steal a drag or a selection. */
+  img,
+  video {
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+}
+
+/* ==========================================================================
+   UTILITIES
+   ========================================================================== */
+
+@layer utilities {
+  /* Small uppercase label used for eyebrows, field labels and meta text. */
+  .label-eyebrow {
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  /* Restrained legibility shadow for text sitting directly on media.
+     Deliberately soft — this is a lift, not a drop shadow. */
+  .text-on-media {
+    text-shadow: 0 1px 2px rgb(0 0 0 / 0.45), 0 2px 18px rgb(0 0 0 / 0.35);
+  }
+
+  /* Skip link.
+     Written out in full rather than composed from sr-only + focus:not-sr-only
+     + focus:fixed — those three fight over `position` and the result depends
+     on utility order, which is not something to leave to chance on the first
+     control a keyboard user meets. It stays in the flow and focusable at all
+     times, and simply slides into view when focused. */
+  .skip-link {
+    position: fixed;
+    top: 0.75rem;
+    left: 0.75rem;
+    z-index: 100;
+    padding: 0.625rem 1rem;
+    border-radius: var(--radius-md);
+    background-color: var(--color-canvas-raised);
+    box-shadow: var(--shadow-lifted);
+    color: var(--color-ink);
+    font-size: 0.875rem;
+    font-weight: 500;
+    transform: translateY(-250%);
+    transition: transform 200ms var(--ease-cinematic);
+  }
+
+  .skip-link:focus {
+    transform: translateY(0);
+  }
+}
+
+/* ==========================================================================
+   MOTION
+   Keyframes defined once here, referenced by components.
+   ========================================================================== */
+
+/* Slow Ken Burns drift applied to hero scenes. */
+@keyframes scene-drift-in {
+  from {
+    transform: scale(1.03);
+  }
+  to {
+    transform: scale(1.13) translate3d(-1.2%, -1%, 0);
+  }
+}
+
+@keyframes scene-drift-out {
+  from {
+    transform: scale(1.13) translate3d(1%, 0.6%, 0);
+  }
+  to {
+    transform: scale(1.03);
+  }
+}
+
+/* Scroll reveal: a short rise with a fade. */
+@keyframes reveal-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Route line drawing itself in on the Current Journey section. */
+@keyframes route-draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Soft halo on the current-stop marker. Low amplitude on purpose. */
+@keyframes marker-pulse {
+  0%,
+  100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.1;
+    transform: scale(2);
+  }
+}
+
+/* ==========================================================================
+   REDUCED MOTION
+   A single global stop. Components additionally check the preference in JS
+   so timers and <video> elements are never started at all.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

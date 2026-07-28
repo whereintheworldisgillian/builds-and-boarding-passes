@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  PLACEHOLDER HERO SCENE 02 — "Ridge line"
+  Temporary artwork. Replace with a real still frame from your footage.
+  See content/hero-scenes.ts for how to swap this out.
+
+  Built from gradients only — no filters, no raster data, no blur passes.
+  Each ridge is slightly lighter than the one in front of it, which is what
+  reads as distance without needing any atmospheric blur.
+
+  Soft light is painted as userSpaceOnUse radial gradients on full-canvas
+  rects rather than on shapes of their own, so no shape edge can show
+  through where the gradient has not yet faded to zero.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" width="1920" height="1080" role="presentation">
+  <defs>
+    <linearGradient id="r-sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%"   stop-color="#1b2430"/>
+      <stop offset="24%"  stop-color="#2c3644"/>
+      <stop offset="44%"  stop-color="#4a4a4e"/>
+      <stop offset="60%"  stop-color="#7a6250"/>
+      <stop offset="72%"  stop-color="#b08258"/>
+      <stop offset="80%"  stop-color="#d6a473"/>
+      <stop offset="100%" stop-color="#8d6647"/>
+    </linearGradient>
+
+    <!-- Low sun, left of centre. -->
+    <radialGradient id="r-sun" gradientUnits="userSpaceOnUse"
+      cx="540" cy="836" r="860"
+      gradientTransform="translate(540,836) scale(1,0.5) translate(-540,-836)">
+      <stop offset="0%"   stop-color="#ffe3bb" stop-opacity="0.78"/>
+      <stop offset="10%"  stop-color="#fbcd95" stop-opacity="0.60"/>
+      <stop offset="24%"  stop-color="#efb178" stop-opacity="0.41"/>
+      <stop offset="40%"  stop-color="#dd9761" stop-opacity="0.25"/>
+      <stop offset="58%"  stop-color="#cd8654" stop-opacity="0.13"/>
+      <stop offset="78%"  stop-color="#c27c4d" stop-opacity="0.05"/>
+      <stop offset="100%" stop-color="#c27c4d" stop-opacity="0"/>
+    </radialGradient>
+
+    <!-- Ridges: back to front, each a touch darker and cooler. -->
+    <linearGradient id="r-4" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6f6a63"/><stop offset="100%" stop-color="#544f4a"/>
+    </linearGradient>
+    <linearGradient id="r-3" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4e4842"/><stop offset="100%" stop-color="#393430"/>
+    </linearGradient>
+    <linearGradient id="r-2" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#332e2a"/><stop offset="100%" stop-color="#24201d"/>
+    </linearGradient>
+    <linearGradient id="r-1" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1d1a18"/><stop offset="100%" stop-color="#100e0d"/>
+    </linearGradient>
+
+    <radialGradient id="r-vig" gradientUnits="userSpaceOnUse"
+      cx="960" cy="540" r="1180"
+      gradientTransform="translate(960,540) scale(1,0.62) translate(-960,-540)">
+      <stop offset="0%"   stop-color="#000000" stop-opacity="0"/>
+      <stop offset="45%"  stop-color="#000000" stop-opacity="0.04"/>
+      <stop offset="70%"  stop-color="#000000" stop-opacity="0.16"/>
+      <stop offset="88%"  stop-color="#000000" stop-opacity="0.31"/>
+      <stop offset="100%" stop-color="#000000" stop-opacity="0.44"/>
+    </radialGradient>
+  </defs>
+
+  <rect width="1920" height="1080" fill="url(#r-sky)"/>
+  <rect width="1920" height="1080" fill="url(#r-sun)"/>
+
+  <path d="M0 706 L180 634 L330 680 L520 582 L700 656 L880 604 L1080 678 L1290 612 L1500 672 L1720 626 L1920 684 L1920 1080 L0 1080 Z" fill="url(#r-4)"/>
+  <path d="M0 800 L200 734 L400 786 L610 700 L820 772 L1010 720 L1240 794 L1450 726 L1660 782 L1920 734 L1920 1080 L0 1080 Z" fill="url(#r-3)"/>
+  <path d="M0 894 L240 838 L470 890 L700 816 L940 882 L1180 830 L1420 898 L1670 838 L1920 882 L1920 1080 L0 1080 Z" fill="url(#r-2)"/>
+  <path d="M0 988 L280 946 L560 992 L840 934 L1120 986 L1400 942 L1680 990 L1920 956 L1920 1080 L0 1080 Z" fill="url(#r-1)"/>
+
+  <rect width="1920" height="1080" fill="url(#r-vig)"/>
+</svg>
