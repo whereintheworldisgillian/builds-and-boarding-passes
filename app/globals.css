@@ -74,9 +74,9 @@
      Families are injected by next/font in app/layout.tsx and land on these
      variables. Swapping typefaces means editing layout.tsx only.
   ------------------------------------------------------------------------ */
-  --font-display: var(--font-dm-serif), Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, -apple-system,
-    "Segoe UI", sans-serif;
+  --font-display: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-plex-condensed), "Arial Narrow", ui-sans-serif,
+    system-ui, sans-serif;
 
   /* --- Layout ----------------------------------------------------------- */
   --spacing-content: 75rem; /* 1200px max content width */

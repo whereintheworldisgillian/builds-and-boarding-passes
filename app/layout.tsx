@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { DM_Serif_Display, Montserrat } from "next/font/google";
+import { IBM_Plex_Sans_Condensed, Syne } from "next/font/google";
 import { SITE } from "@/content/site";
 import "./globals.css";
 
@@ -8,26 +8,27 @@ import "./globals.css";
    Both are open source and self-hosted at build time by next/font — no
    requests to Google at runtime, and no layout shift from font swapping.
 
-   DM Serif Display — the headline voice. Emotional, editorial. Only ships
-                      a 400 weight; italic is the accent.
-   Montserrat       — interface labels and departure-board data.
+   Syne                    — the headline voice. Bold, modern travel
+                             broadcast; strong enough to be show branding.
+   IBM Plex Sans Condensed — brand lockup, departure-board labels and
+                             values, stamp lettering, buttons.
 
    To swap either typeface, change it here. The rest of the project only
    ever refers to --font-display / --font-sans.
    -------------------------------------------------------------------------- */
 
-const dmSerifDisplay = DM_Serif_Display({
+const syne = Syne({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-dm-serif",
-  weight: "400",
-  style: ["normal", "italic"],
+  variable: "--font-syne",
 });
 
-const montserrat = Montserrat({
+const plexCondensed = IBM_Plex_Sans_Condensed({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-montserrat",
+  variable: "--font-plex-condensed",
+  // Plex Condensed ships static weights only; load just the ones in use.
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -52,7 +53,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${dmSerifDisplay.variable} ${montserrat.variable}`}>
+    <html lang="en" className={`${syne.variable} ${plexCondensed.variable}`}>
       <body className="min-h-dvh antialiased">
         {/* Keyboard users land here first and can jump the header + hero. */}
         <a href="#main" className="skip-link">

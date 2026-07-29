@@ -31,15 +31,20 @@ Centralized in `app/globals.css` as `--color-passport-*` tokens:
 Use selectively — photography provides most of the visual color. No neon, no
 yellow as a major color.
 
-## Type (user-pinned)
+## Type (user-pinned, revised 2026-07-29 typeset pass)
 
-- **DM Serif Display** (`--font-display`) — headlines only. Emotional,
-  editorial. Italic allowed as an accent.
-- **Montserrat** (`--font-sans`) — interface labels, board data, buttons.
-  Uppercase + letterspacing for labels and codes.
+- **Syne** (`--font-display`) — headlines only, Bold/ExtraBold, mixed case
+  with intentional line breaks. Modern travel broadcast: strong enough to
+  work as show branding. No italic treatment.
+- **IBM Plex Sans Condensed** (`--font-sans`) — brand lockup, WORLD TOUR
+  label, departure-board labels and values, stamp lettering, buttons.
+  Stronger weights (700) for destination codes and flight numbers;
+  secondary labels lighter (500) but never faint.
 
-Loaded via `next/font` in `app/layout.tsx`; components refer only to
-`--font-display` / `--font-sans`.
+No more than these two families. Explicitly banned: DM Serif Display,
+Montserrat, Inter, Bricolage Grotesque, Playfair Display, digital-clock
+faces. Loaded via `next/font` in `app/layout.tsx`; components refer only
+to `--font-display` / `--font-sans`.
 
 ## Materials & components
 

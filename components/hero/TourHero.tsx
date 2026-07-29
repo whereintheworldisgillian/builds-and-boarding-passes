@@ -20,7 +20,7 @@ import { HeroSlideshow } from "./HeroSlideshow";
    ========================================================================== */
 
 const BOARD_ROWS = [
-  { label: "Flight", value: "BBP 001" },
+  { label: "Flight", value: "BBP 001", code: true },
   { label: "Current stop", value: "HKT — Phuket", feature: true },
   { label: "Current build", value: "Builds & Boarding Passes" },
   { label: "Status", value: "Boarding soon", live: true },
@@ -55,14 +55,14 @@ export function TourHero() {
       <div className="relative z-10 mx-auto flex min-h-svh w-full max-w-content flex-col px-6 pt-7 pb-10 sm:px-10">
         {/* Brand lockup — no nav yet, deliberately. */}
         <header className="flex flex-col gap-1.5 sm:flex-row sm:items-baseline sm:gap-4">
-          <p className="text-sm font-semibold tracking-[0.22em] text-passport-parchment text-on-media">
+          <p className="text-[0.9375rem] font-semibold tracking-[0.16em] text-passport-parchment text-on-media">
             BUILDS &amp; BOARDING PASSES
           </p>
           <span
             aria-hidden="true"
             className="hidden h-px w-8 self-center bg-passport-mist/50 sm:block"
           />
-          <p className="text-[0.6875rem] font-medium tracking-[0.3em] whitespace-nowrap text-passport-mist text-on-media">
+          <p className="text-xs font-medium tracking-[0.24em] whitespace-nowrap text-passport-mist text-on-media">
             WORLD TOUR
           </p>
         </header>
@@ -70,15 +70,21 @@ export function TourHero() {
         {/* Composed editorial split: words left, board right. */}
         <div className="my-auto grid items-center gap-14 pt-16 pb-6 lg:grid-cols-[1.15fr_0.85fr] lg:gap-10">
           <div className="max-w-2xl">
-            <h1 className="font-display text-[clamp(2.625rem,5vw,4.375rem)] leading-[1.06] font-normal text-passport-parchment text-on-media">
-              Check in. Step out.
+            {/* Syne ExtraBold, mixed case, deliberate breaks — a show title,
+                not a quote floated over a photo. */}
+            <h1 className="font-display text-[clamp(1.875rem,4.6vw,4.25rem)] leading-[1.02] font-extrabold tracking-[-0.015em] text-passport-parchment text-on-media">
+              Check in.
               <br />
-              <em>Build before you&rsquo;re ready.</em>
+              Step out.
+              <br />
+              Build before
+              <br />
+              you&rsquo;re ready.
             </h1>
 
             <button
               type="button"
-              className="mt-10 inline-block rounded-sm bg-passport-parchment px-8 py-4 text-[0.8125rem] font-bold tracking-[0.18em] text-passport-navy shadow-lifted transition-colors duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-passport-parchment"
+              className="mt-10 inline-block rounded-sm bg-passport-parchment px-8 py-4 text-sm font-bold tracking-[0.12em] text-passport-navy shadow-lifted transition-colors duration-200 hover:bg-white focus-visible:outline-2 focus-visible:outline-offset-3 focus-visible:outline-passport-parchment"
             >
               JOIN THE JOURNEY
             </button>
@@ -107,18 +113,20 @@ function DepartureBoard() {
             key={row.label}
             className="flex items-baseline justify-between gap-6 border-b border-passport-mist/15 py-4 last:border-b-0"
           >
-            <dt className="shrink-0 text-[0.625rem] font-semibold tracking-[0.26em] text-passport-mist uppercase">
+            <dt className="shrink-0 text-[0.6875rem] font-medium tracking-[0.18em] text-passport-mist uppercase">
               {row.label}
             </dt>
             <dd
               className={
                 "feature" in row && row.feature
-                  ? "text-right text-[1.375rem] font-semibold tracking-[0.08em] text-passport-parchment uppercase"
-                  : "live" in row && row.live
-                    ? "flex items-baseline gap-2.5 text-right text-sm font-semibold tracking-[0.14em] text-passport-stamp-bright uppercase"
-                    : "muted" in row && row.muted
-                      ? "text-right text-sm font-medium tracking-[0.14em] text-passport-mist uppercase"
-                      : "text-right text-sm font-semibold tracking-[0.14em] text-passport-parchment uppercase"
+                  ? "text-right text-2xl font-bold tracking-[0.06em] text-passport-parchment uppercase"
+                  : "code" in row && row.code
+                    ? "text-right text-[0.9375rem] font-bold tracking-[0.1em] text-passport-parchment uppercase"
+                    : "live" in row && row.live
+                      ? "flex items-baseline gap-2.5 text-right text-sm font-semibold tracking-[0.1em] text-passport-stamp-bright uppercase"
+                      : "muted" in row && row.muted
+                        ? "text-right text-sm font-medium tracking-[0.1em] text-passport-mist uppercase"
+                        : "text-right text-sm font-semibold tracking-[0.1em] text-passport-parchment uppercase"
               }
             >
               {"live" in row && row.live && (
