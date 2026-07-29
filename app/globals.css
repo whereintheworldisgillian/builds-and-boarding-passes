@@ -74,9 +74,12 @@
      Families are injected by next/font in app/layout.tsx and land on these
      variables. Swapping typefaces means editing layout.tsx only.
   ------------------------------------------------------------------------ */
-  --font-display: var(--font-syne), ui-sans-serif, system-ui, sans-serif;
-  --font-sans: var(--font-plex-condensed), "Arial Narrow", ui-sans-serif,
-    system-ui, sans-serif;
+  --font-display: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, monospace;
+  /* System serif — no webfont to load. Used ITALIC ONLY, as the second
+     headline line. Never set body copy in this. */
+  --font-serif: Georgia, "Times New Roman", serif;
 
   /* --- Layout ----------------------------------------------------------- */
   --spacing-content: 75rem; /* 1200px max content width */
@@ -95,14 +98,22 @@
    ========================================================================== */
 
 @theme {
-  --color-passport-navy: #111826; /* near-black navy — panels, scrims */
-  --color-passport-indigo: #283a66; /* deep indigo — gradient tint */
+  /* Darkened 2026-07-29: the base went from a readable navy (#111826) to
+     near-black with only a navy cast left in it. Photography and ONE hot
+     accent now carry the whole contrast story. */
+  --color-passport-navy: #0a0d13; /* near-black — page base, scrims */
+  --color-passport-indigo: #1e2a44; /* deep indigo — gradient tint only */
   --color-passport-violet: #67527a; /* dusty violet ink — rare accent */
-  --color-passport-parchment: #eee8d8; /* soft parchment — text, CTA */
-  --color-passport-stamp: #b75a5e; /* muted coral — stamp ink */
-  /* Coral tinted up for small text on navy: #B75A5E is 3.9:1 on navy
-     (fails AA); this tint is 6.6:1. Same hue, legible. */
-  --color-passport-stamp-bright: #d68a8d;
+  --color-passport-parchment: #eee8d8; /* soft parchment — text, paper, CTA */
+
+  /* Two corals, and they are not interchangeable:
+     `stamp` is INK ON PAPER — muted, only ever used on parchment.
+     `signal` is the LIVE STATE — hot, only on the near-black base, never
+     for decoration. 7.4:1 on the base. Spend it rarely; it is the one
+     electric colour in the system. */
+  --color-passport-stamp: #b75a5e;
+  --color-passport-signal: #ff7a5c;
+
   --color-passport-mist: #aab4c2; /* cool mist — labels, hairlines */
 }
 

@@ -1,34 +1,35 @@
 import type { Metadata, Viewport } from "next";
-import { IBM_Plex_Sans_Condensed, Syne } from "next/font/google";
+import { Geist, Geist_Mono } from "next/font/google";
 import { SITE } from "@/content/site";
 import "./globals.css";
 
 /* --------------------------------------------------------------------------
-   TYPEFACES — Modern Passport Ink (see DESIGN.md)
-   Both are open source and self-hosted at build time by next/font — no
-   requests to Google at runtime, and no layout shift from font swapping.
+   TYPEFACES — user-pinned 2026-07-29 (see DESIGN.md)
 
-   Syne                    — the headline voice. Bold, modern travel
-                             broadcast; strong enough to be show branding.
-   IBM Plex Sans Condensed — brand lockup, departure-board labels and
-                             values, stamp lettering, buttons.
+   Geist       — the whole interface. Variable, so the headline can sit at
+                 800 and a label at 500 without loading two files.
+   Geist Mono  — board data, field labels, codes, timestamps. The "printed
+                 by a machine at the gate" voice.
+   Georgia     — italic only, for the second headline line. A SYSTEM serif:
+                 no webfont request, no variable to wire up. Referenced
+                 directly from --font-serif in globals.css.
 
-   To swap either typeface, change it here. The rest of the project only
-   ever refers to --font-display / --font-sans.
+   Both webfonts are self-hosted at build time by next/font — no runtime
+   request to Google, no swap-in layout shift. To change a typeface, change
+   it here; the rest of the project only refers to --font-display /
+   --font-sans / --font-mono / --font-serif.
    -------------------------------------------------------------------------- */
 
-const syne = Syne({
+const geist = Geist({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-syne",
+  variable: "--font-geist",
 });
 
-const plexCondensed = IBM_Plex_Sans_Condensed({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-plex-condensed",
-  // Plex Condensed ships static weights only; load just the ones in use.
-  weight: ["400", "500", "600", "700"],
+  variable: "--font-geist-mono",
 });
 
 export const metadata: Metadata = {
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#111826",
+  themeColor: "#0a0d13",
   colorScheme: "dark",
 };
 
@@ -53,7 +54,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${syne.variable} ${plexCondensed.variable}`}>
+    <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
       <body className="min-h-dvh antialiased">
         {/* Keyboard users land here first and can jump the header + hero. */}
         <a href="#main" className="skip-link">

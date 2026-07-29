@@ -1,4 +1,5 @@
 import { TourHero } from "@/components/hero/TourHero";
+import { DepartureBoard } from "@/components/sections/DepartureBoard";
 
 /**
  * Homepage — hero redesign phase (2026-07-29).
@@ -18,6 +19,7 @@ export default function HomePage() {
   return (
     <main id="main">
       <TourHero />
+      <DepartureBoard />
     </main>
   );
 }
