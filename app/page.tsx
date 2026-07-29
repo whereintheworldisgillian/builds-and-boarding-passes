@@ -1,27 +1,23 @@
-import { SiteHeader } from "@/components/layout/SiteHeader";
-import { SiteFooter } from "@/components/layout/SiteFooter";
-import { Hero } from "@/components/hero/Hero";
-import { CurrentJourney } from "@/components/sections/CurrentJourney";
-import { PassportPreview } from "@/components/sections/PassportPreview";
-import { CommunityPromise } from "@/components/sections/CommunityPromise";
+import { TourHero } from "@/components/hero/TourHero";
 
 /**
- * Homepage — phase one.
+ * Homepage — hero redesign phase (2026-07-29).
  *
- * Composition only: every section owns its own markup and content, so adding
- * or reordering sections later is a change to this list and nothing else.
+ * Only the new TourHero is mounted while the rest of the page is redesigned
+ * to match. The legacy phase-one sections are preserved untouched in the
+ * repo and can be remounted from here when their turn comes:
+ *
+ *   SiteHeader        components/layout/SiteHeader.tsx
+ *   Hero (legacy)     components/hero/Hero.tsx
+ *   CurrentJourney    components/sections/CurrentJourney.tsx
+ *   PassportPreview   components/sections/PassportPreview.tsx
+ *   CommunityPromise  components/sections/CommunityPromise.tsx
+ *   SiteFooter        components/layout/SiteFooter.tsx
  */
 export default function HomePage() {
   return (
-    <>
-      <SiteHeader />
-      <main id="main">
-        <Hero />
-        <CurrentJourney />
-        <PassportPreview />
-        <CommunityPromise />
-      </main>
-      <SiteFooter />
-    </>
+    <main id="main">
+      <TourHero />
+    </main>
   );
 }

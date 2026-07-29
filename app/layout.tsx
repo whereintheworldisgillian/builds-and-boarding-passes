@@ -1,34 +1,33 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter } from "next/font/google";
+import { DM_Serif_Display, Montserrat } from "next/font/google";
 import { SITE } from "@/content/site";
 import "./globals.css";
 
 /* --------------------------------------------------------------------------
-   TYPEFACES
+   TYPEFACES — Modern Passport Ink (see DESIGN.md)
    Both are open source and self-hosted at build time by next/font — no
    requests to Google at runtime, and no layout shift from font swapping.
 
-   Fraunces  — editorial display serif. Warm, high contrast, a bit of
-               character. Carries the headlines.
-   Inter     — neutral interface sans. Carries everything else.
+   DM Serif Display — the headline voice. Emotional, editorial. Only ships
+                      a 400 weight; italic is the accent.
+   Montserrat       — interface labels and departure-board data.
 
    To swap either typeface, change it here. The rest of the project only
    ever refers to --font-display / --font-sans.
    -------------------------------------------------------------------------- */
 
-const fraunces = Fraunces({
+const dmSerifDisplay = DM_Serif_Display({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-fraunces",
-  // Weight range only — no SOFT/WONK/opsz axes. Nothing in the design uses
-  // them, and every extra axis makes the variable font meaningfully heavier.
-  weight: ["400", "600", "700"],
+  variable: "--font-dm-serif",
+  weight: "400",
+  style: ["normal", "italic"],
 });
 
-const inter = Inter({
+const montserrat = Montserrat({
   subsets: ["latin"],
   display: "swap",
-  variable: "--font-inter",
+  variable: "--font-montserrat",
 });
 
 export const metadata: Metadata = {
@@ -45,7 +44,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0c0b0a",
+  themeColor: "#111826",
   colorScheme: "dark",
 };
 
@@ -53,7 +52,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${fraunces.variable} ${inter.variable}`}>
+    <html lang="en" className={`${dmSerifDisplay.variable} ${montserrat.variable}`}>
       <body className="min-h-dvh antialiased">
         {/* Keyboard users land here first and can jump the header + hero. */}
         <a href="#main" className="skip-link">

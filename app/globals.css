@@ -74,8 +74,8 @@
      Families are injected by next/font in app/layout.tsx and land on these
      variables. Swapping typefaces means editing layout.tsx only.
   ------------------------------------------------------------------------ */
-  --font-display: var(--font-fraunces), Georgia, "Times New Roman", serif;
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+  --font-display: var(--font-dm-serif), Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-montserrat), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
 
   /* --- Layout ----------------------------------------------------------- */
@@ -86,6 +86,24 @@
      Slow and intentional. Nothing here is springy or bouncy.
   ------------------------------------------------------------------------ */
   --ease-cinematic: cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+/* ==========================================================================
+   MODERN PASSPORT INK — the hero redesign palette (see DESIGN.md).
+   The tokens above this block belong to the legacy phase-one sections,
+   which are preserved but currently unmounted. New work uses these.
+   ========================================================================== */
+
+@theme {
+  --color-passport-navy: #111826; /* near-black navy — panels, scrims */
+  --color-passport-indigo: #283a66; /* deep indigo — gradient tint */
+  --color-passport-violet: #67527a; /* dusty violet ink — rare accent */
+  --color-passport-parchment: #eee8d8; /* soft parchment — text, CTA */
+  --color-passport-stamp: #b75a5e; /* muted coral — stamp ink */
+  /* Coral tinted up for small text on navy: #B75A5E is 3.9:1 on navy
+     (fails AA); this tint is 6.6:1. Same hue, legible. */
+  --color-passport-stamp-bright: #d68a8d;
+  --color-passport-mist: #aab4c2; /* cool mist — labels, hairlines */
 }
 
 /* ==========================================================================
@@ -122,10 +140,10 @@
     text-wrap: pretty;
   }
 
-  /* Visible, consistent focus on every interactive element. Uses the accent
-     so it reads as designed rather than as a browser default. */
+  /* Visible, consistent focus on every interactive element. Parchment reads
+     clearly on the navy/photography surfaces of the passport-ink world. */
   :focus-visible {
-    outline: 2px solid var(--color-accent);
+    outline: 2px solid var(--color-passport-parchment);
     outline-offset: 3px;
     border-radius: var(--radius-sm);
   }
@@ -189,7 +207,28 @@
    Keyframes defined once here, referenced by components.
    ========================================================================== */
 
-/* Slow Ken Burns drift applied to hero scenes. */
+/* Hero slideshow: a barely-there push-in on the active photo. */
+@keyframes hero-photo-zoom {
+  from {
+    transform: scale(1.02);
+  }
+  to {
+    transform: scale(1.08);
+  }
+}
+
+/* Low-amplitude breathing on the departure board's live-status dot. */
+@keyframes hero-status-pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* Slow Ken Burns drift applied to hero scenes. (Legacy, unmounted.) */
 @keyframes scene-drift-in {
   from {
     transform: scale(1.03);
