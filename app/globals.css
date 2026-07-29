@@ -310,6 +310,11 @@ img {
 }
 
 .hero-copy > p {
+  /* Do not widen this to force one line without shortening the text first.
+     The boarding pass is absolutely positioned over the right of the hero,
+     leaving ~479px clear at a 1280px viewport; this sentence needs ~731px on
+     one line, so widening the box runs the text under the pass. One line
+     needs the copy at roughly 62 characters or fewer. */
   width: min(100%, 570px);
   margin: 2.4rem auto 0;
   color: rgba(255, 255, 255, 0.72);

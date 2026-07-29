@@ -51,7 +51,7 @@ export default function HomePage() {
           <span className="route-line">
             <span className="route-plane">✈</span>
           </span>
-          <span className="route-destination">HKT</span>
+          <span className="route-destination">YOU</span>
         </div>
 
         <aside className="boarding-pass" aria-label="Current boarding pass">
@@ -68,8 +68,8 @@ export default function HomePage() {
               <span>✈</span>
             </div>
             <div>
-              <strong>HKT</strong>
-              <span>Phuket</span>
+              <strong>YOU</strong>
+              <span>The next version of you</span>
             </div>
           </div>
           <div className="pass-details">
