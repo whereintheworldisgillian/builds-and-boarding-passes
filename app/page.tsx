@@ -29,8 +29,8 @@ export default function HomePage() {
 
         <div className="hero-copy">
           <h1 id="hero-title">
-            <span>Build in public.</span>
-            <em>Live in motion.</em>
+            <span>Where ideas get built</span>
+            <em>& borders get crossed.</em>
           </h1>
           <p>
             A moving studio, an open notebook, and a world tour for people who
