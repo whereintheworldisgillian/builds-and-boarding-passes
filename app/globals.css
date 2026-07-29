@@ -314,13 +314,39 @@ img {
      hero and the boarding pass, so it only works because the copy is lifted
      clear of the pass on short viewports — see the paired rule further down.
      Widening this without that lift runs the text under the pass. */
-  width: min(100%, 56rem);
-  margin: 2.4rem auto 0;
-  color: rgba(255, 255, 255, 0.72);
-  font-size: clamp(1rem, 1.3vw, 1.2rem);
-  line-height: 1.6;
+  position: relative;
+  /* The cap has to clear the line at the LARGEST size the clamp can reach, or
+     the font outgrows the box and the line wraps at wide viewports. Measured:
+     this sentence needs 927px at 1.3rem. 59rem = 944px. Retune both together. */
+  width: min(100%, 59rem);
+  margin: 3.1rem auto 0;
+  /* Sits at ~51% down the hero, where the wash is thinnest and the photo swings
+     from luminance 14 to 203 across this single line. At the original caption
+     scale it disappeared into the bright half. Bigger, heavier and brighter, on
+     its own scrim — see ::before. */
+  color: rgba(255, 255, 255, 0.92);
+  font-size: clamp(1rem, 1.35vw, 1.3rem);
+  font-weight: 460;
+  line-height: 1.55;
   text-wrap: balance;
   animation: rise-in 0.9s 0.52s both;
+}
+
+/* A local scrim, not a box: a soft ellipse that fades out well before any edge,
+   so it reads as part of .hero-wash rather than a panel over the photo. It only
+   has to hold the strapline — darkening the wash's mid stop instead would drag
+   the headline down with it. */
+.hero-copy > p::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -1.5rem -6rem;
+  background: radial-gradient(
+    ellipse at center,
+    rgba(7, 13, 14, 0.72) 0%,
+    rgba(7, 13, 14, 0.5) 45%,
+    transparent 78%
+  );
 }
 
 .hero-actions {
@@ -1962,8 +1988,11 @@ footer p:last-child {
    is wide AND short. Lift the copy in that band only; tall viewports already
    have room and keep notultra's original placement. */
 @media (min-width: 1101px) and (max-height: 960px) {
+  /* -11vh, not -9vh: the strapline was scaled up to survive the photo behind it
+     (see .hero-copy > p), and the extra height ate the clearance. There is room
+     — this still leaves the headline ~28px clear of the nav at 720px tall. */
   .hero-copy {
-    transform: translateY(-9vh);
+    transform: translateY(-11vh);
   }
 }
 
