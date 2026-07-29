@@ -32,6 +32,20 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en">
+      <head>
+        {/* Reloading normally drops you back where you were scrolled to, which
+            is wrong for a one-page site that opens on a full-screen hero — and
+            it means the scroll-driven reveals start already spent. This has to
+            run before first paint, so it is an inline script rather than an
+            effect: by the time a hook fires the browser has already restored.
+            A URL with a hash still wins, so #manifest links keep working. */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "if('scrollRestoration' in history)history.scrollRestoration='manual'",
+          }}
+        />
+      </head>
       <body>
         {/* The nav is fixed and the hero is a full screen, so keyboard users
             would otherwise tab through the whole header on every load. */}

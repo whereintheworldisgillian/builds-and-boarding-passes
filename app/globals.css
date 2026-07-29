@@ -310,12 +310,11 @@ img {
 }
 
 .hero-copy > p {
-  /* Do not widen this to force one line without shortening the text first.
-     The boarding pass is absolutely positioned over the right of the hero,
-     leaving ~479px clear at a 1280px viewport; this sentence needs ~731px on
-     one line, so widening the box runs the text under the pass. One line
-     needs the copy at roughly 62 characters or fewer. */
-  width: min(100%, 570px);
+  /* One line at desktop. This is wider than the gap between the centre of the
+     hero and the boarding pass, so it only works because the copy is lifted
+     clear of the pass on short viewports — see the paired rule further down.
+     Widening this without that lift runs the text under the pass. */
+  width: min(100%, 56rem);
   margin: 2.4rem auto 0;
   color: rgba(255, 255, 255, 0.72);
   font-size: clamp(1rem, 1.3vw, 1.2rem);
@@ -1955,4 +1954,29 @@ footer p:last-child {
 
 .skip-link:focus {
   transform: translateY(0);
+}
+
+/* The strapline sits on one line, which makes it wide enough to reach the
+   boarding pass. The pass is bottom-anchored and only rendered above 1100px,
+   so it climbs into the vertically-centred hero copy exactly when the viewport
+   is wide AND short. Lift the copy in that band only; tall viewports already
+   have room and keep notultra's original placement. */
+@media (min-width: 1101px) and (max-height: 960px) {
+  .hero-copy {
+    transform: translateY(-9vh);
+  }
+}
+
+/* Under ~700px tall there is no room for both. Lifting the copy any further
+   would push the headline into the fixed nav (it is already ~16px clear at
+   640px tall), so the strapline goes back to wrapping — its two short lines
+   clear the pass horizontally where one long line cannot. */
+@media (min-width: 1101px) and (max-height: 700px) {
+  .hero-copy {
+    transform: translateY(-5vh);
+  }
+
+  .hero-copy > p {
+    width: min(100%, 570px);
+  }
 }
