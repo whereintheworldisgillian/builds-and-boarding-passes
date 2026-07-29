@@ -1,63 +1,41 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import { SITE } from "@/content/site";
 import "./globals.css";
 
 /* --------------------------------------------------------------------------
-   TYPEFACES — user-pinned 2026-07-29 (see DESIGN.md)
+   The design this app renders was built by a viewer of the stream and shared
+   as source (Vite + React). It was ported here 2026-07-29 with the markup and
+   stylesheet intact — see DESIGN.md for what is his and what is ours.
 
-   Geist       — the whole interface. Variable, so the headline can sit at
-                 800 and a label at 500 without loading two files.
-   Geist Mono  — board data, field labels, codes, timestamps. The "printed
-                 by a machine at the gate" voice.
-   Georgia     — italic only, for the second headline line. A SYSTEM serif:
-                 no webfont request, no variable to wire up. Referenced
-                 directly from --font-serif in globals.css.
-
-   Both webfonts are self-hosted at build time by next/font — no runtime
-   request to Google, no swap-in layout shift. To change a typeface, change
-   it here; the rest of the project only refers to --font-display /
-   --font-sans / --font-mono / --font-serif.
+   There is no next/font here on purpose. Geist Sans and Geist Mono are
+   self-hosted woff2 files declared with @font-face at the top of globals.css,
+   exactly as he shipped them. Adding next/font on top would load the same
+   typefaces twice.
    -------------------------------------------------------------------------- */
 
-const geist = Geist({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist",
-});
-
-const geistMono = Geist_Mono({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-geist-mono",
-});
-
 export const metadata: Metadata = {
-  title: {
-    default: `${SITE.name} — ${SITE.tagline}`,
-    template: `%s — ${SITE.name}`,
-  },
-  description: SITE.description,
+  title: "Builds & Boarding Passes",
+  description: "A moving studio, an open notebook, and a world tour.",
   openGraph: {
-    title: `${SITE.name} — ${SITE.tagline}`,
-    description: SITE.description,
+    title: "Builds & Boarding Passes",
+    description: "A moving studio, an open notebook, and a world tour.",
     type: "website",
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0a0d13",
-  colorScheme: "dark",
+  // Matches --ink, the colour behind the page at both ends of the scroll.
+  themeColor: "#10181a",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${geist.variable} ${geistMono.variable}`}>
-      <body className="min-h-dvh antialiased">
-        {/* Keyboard users land here first and can jump the header + hero. */}
-        <a href="#main" className="skip-link">
+    <html lang="en">
+      <body>
+        {/* The nav is fixed and the hero is a full screen, so keyboard users
+            would otherwise tab through the whole header on every load. */}
+        <a href="#top" className="skip-link">
           Skip to content
         </a>
         {children}
