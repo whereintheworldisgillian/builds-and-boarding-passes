@@ -6,16 +6,13 @@
 
 ## Where this design came from
 
-The design in this repo was **created by a viewer of the stream**, who built
-it as a redesign and sent the source over. It arrived as a standalone Vite +
-React project and was ported into this Next.js app on 2026-07-29 with the
-markup and stylesheet intact.
+The design in this repo was **created by notultra**, a viewer of the stream,
+who built it as a redesign and sent the source over. It arrived as a
+standalone Vite + React project and was ported into this Next.js app on
+2026-07-29 with the markup and stylesheet intact.
 
-> **TODO: credit the author by name.** The attribution line in `README.md` is
-> a placeholder until the viewer's name or handle is confirmed, and how they
-> want to be credited (and under what licence, if any) is worth asking them
-> directly. Do not guess it from the repo — the export contains no author
-> field.
+No licence came with the export, so if this project ever goes public-source
+or the design gets reused elsewhere, that is worth settling with him first.
 
 The port changed four things and nothing else:
 
@@ -78,6 +75,33 @@ sections and `animation-timeline: scroll(root block)` for the nav morph.
 **There is no JavaScript driving any of it**, which is worth knowing before
 reaching for an observer hook. Browsers without support get the content
 plainly, and `prefers-reduced-motion` flattens everything.
+
+## Motion performance rules
+
+This page is often open while streaming, so it shares a GPU with a video
+encoder. A 2026-07-29 pass fixed several animations that were costing far
+more than they looked. Keep to these:
+
+- **Animate only `opacity`, `transform`, `translate`, `rotate`, `scale`.**
+  Those stay on the compositor. `left`, `top`, `width`, `margin` force layout
+  every frame; `box-shadow`, `filter` and `clip-path` force paint. Three
+  infinite animations here were previously animating `left`, `margin-bottom`
+  and `box-shadow`.
+- **Use `translate`/`rotate`/`scale` rather than `transform`** when an
+  element already has a `transform` — they are independent properties that
+  compose instead of overwriting, which is what let the boarding-pass float
+  move off `margin-bottom`.
+- **No `backdrop-filter` on the fixed nav.** It sits over the hero photo,
+  which animates continuously, so the blur would be recomputed every frame
+  even when nothing is happening. Background opacity does the job.
+- **An infinite animation must be visibly worth it.** The nav status dot ran
+  a `box-shadow` pulse forever that rendered nothing at all, because the
+  keyframes had no `0%` state to interpolate from.
+
+`.hero-media img` still runs `image-breathe` forever on a full-viewport
+filtered layer. That is the most expensive thing left on the page and it is
+kept deliberately — it is the hero's whole sense of life. Revisit it before
+adding anything else that runs continuously.
 
 ## Still static, if you want it real later
 

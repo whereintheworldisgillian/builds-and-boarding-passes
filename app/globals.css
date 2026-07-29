@@ -171,12 +171,15 @@ img {
   transform: translateY(-2px);
 }
 
+/* No animation here on purpose. This carried `pulse 2s infinite`, but with no
+   base box-shadow to start from the keyframes interpolated from `none` through
+   two fully transparent frames — it repainted forever and rendered nothing.
+   Removing it is a no-op visually. See .live-dot for the ripple that works. */
 .nav-status-dot {
   width: 0.42rem;
   height: 0.42rem;
   border-radius: 50%;
   background: var(--orange);
-  animation: pulse 2s infinite;
 }
 
 .nav-cta > span:nth-child(2) {
@@ -387,6 +390,10 @@ img {
   height: 1px;
   background-image: linear-gradient(90deg, rgba(255, 255, 255, 0.75) 50%, transparent 50%);
   background-size: 8px 1px;
+  /* Makes this element a query container so the plane can travel its full
+     width with `translate: 100cqw` instead of animating `left`. The rail is
+     a grid `1fr`, so its width is not expressible any other way in CSS. */
+  container-type: inline-size;
 }
 
 .route-plane {
@@ -725,13 +732,25 @@ img {
 }
 
 .live-dot {
+  position: relative;
   width: 0.45rem;
   height: 0.45rem;
   flex: 0 0 auto;
   border-radius: 50%;
   background: var(--orange);
-  box-shadow: 0 0 0 0 rgba(255, 101, 52, 0.6);
-  animation: pulse 2s infinite;
+}
+
+/* The ripple, as a scaled pseudo-element rather than an animated box-shadow.
+   box-shadow is a paint property, so the old version repainted every frame
+   forever; transform and opacity are composited. The ring starts flush with
+   the dot and grows to 3.2x, which is the same reach the 0.5rem spread had. */
+.live-dot::after {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background: rgba(255, 101, 52, 0.6);
+  content: "";
+  animation: pulse-ring 2s infinite;
 }
 
 .light-section {
@@ -1479,6 +1498,11 @@ footer p:last-child {
   }
 }
 
+/* No backdrop-filter here, deliberately. The scrolled state is a fixed bar
+   sitting over the hero, and the hero photo animates continuously — so a
+   backdrop blur would be re-sampled and re-blurred every frame even while
+   the visitor sits perfectly still. At 0.92 alpha the blur was contributing
+   almost nothing visible anyway; the opacity does the work instead. */
 @keyframes nav-shell-morph {
   from {
     min-height: 4.8rem;
@@ -1487,16 +1511,14 @@ footer p:last-child {
     border-radius: 0;
     background: rgba(7, 13, 14, 0.28);
     box-shadow: 0 0 0 rgba(0, 0, 0, 0);
-    backdrop-filter: blur(0);
   }
   to {
     min-height: 4rem;
     padding: 0.45rem 0.55rem 0.45rem 1.2rem;
     border-color: rgba(255, 255, 255, 0.24);
     border-radius: 999px;
-    background: rgba(12, 20, 22, 0.82);
+    background: rgba(12, 20, 22, 0.92);
     box-shadow: 0 1.25rem 4rem rgba(0, 0, 0, 0.2);
-    backdrop-filter: blur(18px) saturate(130%);
   }
 }
 
@@ -1523,9 +1545,13 @@ footer p:last-child {
   to { opacity: 1; transform: translateY(0) rotate(2.5deg); }
 }
 
+/* `translate`, not `margin-bottom`. Animating a margin reflowed the pass on
+   every frame, forever. `translate` composes with the `transform` that
+   `pass-in` leaves behind (rotate(2.5deg)) instead of overwriting it, which
+   is presumably why the margin was reached for in the first place. */
 @keyframes pass-float {
-  0%, 100% { margin-bottom: 0; }
-  50% { margin-bottom: 0.65rem; }
+  0%, 100% { translate: 0 0; }
+  50% { translate: 0 -0.65rem; }
 }
 
 @keyframes image-breathe {
@@ -1533,14 +1559,18 @@ footer p:last-child {
   to { transform: scale(1.08); }
 }
 
-@keyframes pulse {
-  70% { box-shadow: 0 0 0 0.5rem rgba(255, 101, 52, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(255, 101, 52, 0); }
+@keyframes pulse-ring {
+  0% { opacity: 1; transform: scale(1); }
+  70%, 100% { opacity: 0; transform: scale(3.2); }
 }
 
+/* `translate`, not `left`. Animating `left` ran layout on every frame for as
+   long as the page was open; `translate` is an independent transform property,
+   so it composes with .route-plane's existing `transform` and stays on the
+   compositor. 100cqw is the width of .route-line. */
 @keyframes plane-fly {
-  0% { left: 0; }
-  50%, 100% { left: 100%; }
+  0% { translate: 0; }
+  50%, 100% { translate: 100cqw; }
 }
 
 @keyframes cue {
@@ -1623,16 +1653,14 @@ footer p:last-child {
       border-radius: 0;
       background: rgba(7, 13, 14, 0.38);
       box-shadow: none;
-      backdrop-filter: blur(0);
     }
     to {
       min-height: 3.7rem;
       padding: 0.35rem 0.45rem 0.35rem 1rem;
       border-color: rgba(255, 255, 255, 0.24);
       border-radius: 999px;
-      background: rgba(12, 20, 22, 0.86);
+      background: rgba(12, 20, 22, 0.94);
       box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.2);
-      backdrop-filter: blur(18px);
     }
   }
 

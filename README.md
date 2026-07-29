@@ -12,12 +12,9 @@ the page is literal markup in `app/page.tsx`.
 
 ## Design credit
 
-The design was created by a **viewer of the stream**, who built it as a
-redesign and shared the source. It was ported from a standalone Vite project
+The design was created by **notultra**, a viewer of the stream, who built it as
+a redesign and shared the source. It was ported from a standalone Vite project
 into this app on 2026-07-29 with the markup and stylesheet intact.
-
-> **TODO:** replace this with the author's actual name or handle, in whatever
-> form they'd like to be credited.
 
 See [DESIGN.md](DESIGN.md) for what came from them and what was changed.
 
