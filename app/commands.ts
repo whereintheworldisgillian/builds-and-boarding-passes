@@ -11,14 +11,14 @@
    -------------------------------------------------------------------------- */
 
 /**
- * Real destinations, once they exist. `null` means "not linked yet", and the
- * matching command will say so instead of going nowhere.
- *
- * Paste the URLs in here when the channels come online — that is the only edit
- * needed to make /live and /discord work.
+ * Real destinations. `null` means "not linked yet", and the matching command
+ * will say so instead of going nowhere. Paste missing URLs in here when their
+ * destinations come online.
  */
 export const LINKS: Record<"livestream" | "discord", string | null> = {
-  livestream: null,
+  // The channel-level route always targets the current livestream instead of
+  // requiring this file to be updated for every new broadcast.
+  livestream: "https://www.youtube.com/@whereintheworldisgillian/live",
   discord: null,
 };
 
@@ -153,8 +153,8 @@ export const COMMANDS: Command[] = [
   },
 ];
 
-/** Tolerant lookup: accepts "/help", "help", and stray whitespace or case. */
+/** Tolerant lookup: accepts "/help", "\help", "help", and stray whitespace or case. */
 export function findCommand(raw: string): Command | undefined {
-  const name = raw.trim().toLowerCase().replace(/^\/+/, "");
+  const name = raw.trim().toLowerCase().replace(/^[\\/]+/, "");
   return COMMANDS.find((command) => command.name === name);
 }
