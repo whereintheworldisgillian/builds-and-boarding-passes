@@ -213,10 +213,8 @@ export default function Terminal() {
         ref={buttonRef}
         type="button"
         className="terminal-launch"
-        // The visible label is wrapped in spans next to a decorative prompt
-        // glyph, so the name is stated outright rather than left to subtree
-        // computation. It matches the visible text, which keeps "label in name"
-        // satisfied for voice control.
+        // The compact launcher is icon-only, so its accessible name states the
+        // action and updates with the same open state as the visual glyph.
         aria-label={open ? "Close terminal" : "Open terminal"}
         aria-haspopup="dialog"
         aria-expanded={open}
@@ -225,13 +223,15 @@ export default function Terminal() {
         aria-controls={open ? panelId : undefined}
         onClick={() => (open ? close() : setOpen(true))}
       >
-        {/* The visible chip. The notched corner lives on this inner element and
-            not on the button, because clip-path would crop the focus ring. */}
-        <span className="terminal-launch-face">
-          <span className="terminal-launch-prompt" aria-hidden="true">
-            &gt;<i className="terminal-caret" />
-          </span>
-          <span>{open ? "Close terminal" : "Open terminal"}</span>
+        <span className="terminal-launch-face" aria-hidden="true">
+          {open ? (
+            <span className="terminal-launch-dismiss">×</span>
+          ) : (
+            <span className="terminal-launch-prompt">
+              &gt;<i className="terminal-caret" />
+            </span>
+          )}
+          <i className="terminal-launch-status" />
         </span>
       </button>
 

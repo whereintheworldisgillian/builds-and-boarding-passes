@@ -2100,24 +2100,10 @@ footer p:last-child {
 /* ==========================================================================
    TERMINAL — floating launcher + console panel
 
-   Styled as gate furniture rather than a chat widget: the notched corner is the
-   nav chip's shape, the type is the departure board's mono at the same size and
-   tracking as the route rail, and the status word borrows the board's own
-   vocabulary. It should read as another bottom-anchored instrument in the hero,
-   not as something bolted on afterwards.
-
-   ---- On the position ----------------------------------------------------
-   The obvious bottom-right corner is already taken. .boarding-pass is anchored
-   there (right: 4vw, bottom: 2.6rem, min-width 320px) and measures 331x274 at
-   1280x720, leaving 46px to its right and a 182px gap between it and the
-   centred scroll cue — not enough for a labelled chip at any desktop width, and
-   the gap closes completely around 1101px.
-
-   So above 1101px the launcher tucks in immediately to the LEFT of the pass and
-   a little above the scroll cue, joining the row of instruments already along
-   the bottom of the hero. Below 1101px the pass is not rendered at all and the
-   launcher takes the true bottom-right corner. Both offsets are derived from the
-   pass's own geometry, so they track it if it moves.
+   A compact chatbot-style bubble keeps the terminal available while scrolling
+   without reading as a second call-to-action. The terminal prompt, route-open
+   status light and departure-board palette keep it inside the boarding brand.
+   Both the launcher and its panel remain fixed to the bottom-right corner.
    ------------------------------------------------------------------------ */
 
 .terminal-launch,
@@ -2131,31 +2117,28 @@ footer p:last-child {
 
 .terminal-launch {
   bottom: max(1.15rem, env(safe-area-inset-bottom, 0px));
+  width: 3.5rem;
+  height: 3.5rem;
   padding: 0;
   border: 0;
+  border-radius: 50%;
   background: none;
-  /* The chip itself is the inner face, so the focus ring can sit outside it. */
   line-height: 0;
 }
 
 .terminal-launch-face {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  /* 44px, so the chip clears the minimum touch target on a phone. The type is
-     board-sized, so this is padding rather than a bigger font. */
-  min-height: 2.75rem;
-  padding: 0.7rem 0.9rem;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
   color: var(--paper-bright);
   background: rgba(16, 24, 26, 0.93);
   border: 1px solid var(--white-line);
-  clip-path: polygon(0 0, calc(100% - 0.62rem) 0, 100% 0.62rem, 100% 100%, 0 100%);
-  font-size: 0.6rem;
+  border-radius: 50%;
+  font-size: 0.95rem;
   font-weight: 700;
-  letter-spacing: 0.13em;
   line-height: 1;
-  text-transform: uppercase;
-  /* Offset and blur, so it reads as a raised object rather than a halo. */
   box-shadow: 0 0.7rem 1.6rem rgba(0, 0, 0, 0.42);
   transition: transform 180ms ease, border-color 180ms ease,
     background-color 180ms ease, box-shadow 180ms ease;
@@ -2165,6 +2148,22 @@ footer p:last-child {
   display: inline-flex;
   align-items: baseline;
   color: var(--acid);
+}
+
+.terminal-launch-dismiss {
+  font-size: 1.45rem;
+  font-weight: 400;
+}
+
+.terminal-launch-status {
+  position: absolute;
+  top: 0.34rem;
+  right: 0.34rem;
+  width: 0.48rem;
+  height: 0.48rem;
+  border-radius: 50%;
+  background: #ebef48;
+  box-shadow: 0 0 0 0.18rem rgba(16, 24, 26, 0.95);
 }
 
 /* The caret only blinks on hover, focus, or while the panel is open. A cursor
@@ -2180,11 +2179,17 @@ footer p:last-child {
 }
 
 .terminal-launch:hover .terminal-launch-face,
-.terminal-launch:focus-visible .terminal-launch-face {
+.terminal-launch:focus-visible .terminal-launch-face,
+.terminal-launch[aria-expanded="true"] .terminal-launch-face {
   border-color: rgba(217, 255, 111, 0.55);
   background: var(--ink-soft);
   transform: translateY(-2px);
   box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.5);
+}
+
+.terminal-launch:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 0.22rem;
 }
 
 .terminal-launch:hover .terminal-caret,
@@ -2203,7 +2208,7 @@ footer p:last-child {
 .terminal-panel {
   /* Named, because the log's max-height has to be derived from it — the panel
      grows upward from here and must not run past the top of the screen. */
-  --terminal-bottom: calc(max(1.15rem, env(safe-area-inset-bottom, 0px)) + 3.35rem);
+  --terminal-bottom: calc(max(1.15rem, env(safe-area-inset-bottom, 0px)) + 4.25rem);
   /* Header, pinned suggestion row and input row — the fixed chrome around the
      scrolling log. Update this if you add another pinned row, or the log will
      stop shrinking to compensate and the panel can outgrow the screen. */
@@ -2520,31 +2525,6 @@ footer p:last-child {
 @media (hover: hover) and (pointer: fine) {
   .terminal-input {
     font-size: 0.85rem;
-  }
-}
-
-/* Above this width .boarding-pass exists and owns the bottom-right corner, so
-   both launcher and panel step to its left. The offsets are expressed in the
-   pass's own terms: 4vw of page gutter, its width, then a gap. */
-@media (min-width: 1101px) {
-  .terminal-launch,
-  .terminal-panel {
-    /* The pass's own width, not min(23vw, 360px): it also carries
-       min-width: 320px, which wins below ~1565px, and rotate(2.5deg) grows its
-       bounding box by about 12px. clamp() covers the first, the 2.1rem covers
-       the rotation plus a real gap. */
-    right: calc(4vw + clamp(320px, 23vw, 360px) + 2.1rem);
-  }
-
-  .terminal-launch {
-    /* Sits above the scroll cue, which is also bottom-anchored, so this keeps a
-       constant ~19px clearance at every viewport height. */
-    bottom: 6.2rem;
-  }
-
-  .terminal-panel {
-    /* The log's max-height follows this automatically. */
-    --terminal-bottom: 9.2rem;
   }
 }
 
