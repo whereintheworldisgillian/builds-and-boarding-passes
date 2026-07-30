@@ -53,7 +53,9 @@ app/
   globals.css    THE ENTIRE VISUAL SYSTEM — ~1900 lines of plain CSS
 public/
   fonts/         Geist Sans + Geist Mono, self-hosted woff2
-  *.jpg          the three photographs
+  hero/          the six hero slideshow photographs, 01–06 in rotation order
+  *.jpg          the two in-page photographs
+photo-originals/ full-resolution sources — gitignored, never served
 ```
 
 Two files carry the site. That is deliberate, and it is how the design was
@@ -66,6 +68,12 @@ handed over.
 | Any words, any section, the departure rows | `app/page.tsx` |
 | Any colour, spacing, type, motion | `app/globals.css` |
 | The photographs | `public/*.jpg` — keep the filenames |
+| A hero slideshow photo | swap the file in `public/hero/` — no code change |
+
+Adding or removing a hero slide is **not** just a file change: the slide count
+is baked into the keyframe percentages in `globals.css`. See the `HERO
+SLIDESHOW` comment there, and [DESIGN.md](DESIGN.md) for why new photos must go
+through the crop/re-encode pipeline first (EXIF GPS).
 
 Colours are custom properties in the `:root` block at the top of the
 stylesheet: `--ink`, `--paper`, `--orange`, `--acid`. Change one there and the

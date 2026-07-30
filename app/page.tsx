@@ -21,8 +21,26 @@ export default function HomePage() {
       </header>
 
       <section className="hero" aria-labelledby="hero-title">
+        {/* Six stacked photos on one shared CSS loop — crossfading, each with a
+            slow zoom, no JavaScript. Slot 01 is the flight window; 02–06 are
+            Gillian's own travel photographs.
+
+            Ordered to alternate tone rather than geography, so no two
+            consecutive slides sit at the same brightness: dark window, bright
+            lake, near-black pavilion, misty wall, black cityscape, vivid
+            sunset. Reorder by renaming the files.
+
+            THE COUNT IS BAKED INTO THE CSS. Keyframe percentages cannot use
+            calc(), so adding or removing a slide means retuning the keyframes
+            and the nth-child delays in globals.css. The formula is in the
+            comment above them. */}
         <div className="hero-media" aria-hidden="true">
-          <img src="/flight-window.jpg" alt="" />
+          <img src="/hero/01-flight-window.jpg" alt="" fetchPriority="high" decoding="async" />
+          <img src="/hero/02-attabad-lake.jpg" alt="" decoding="async" />
+          <img src="/hero/03-night-pavilion.jpg" alt="" decoding="async" />
+          <img src="/hero/04-great-wall.jpg" alt="" decoding="async" />
+          <img src="/hero/05-bangkok-night.jpg" alt="" decoding="async" />
+          <img src="/hero/06-sunset-rays.jpg" alt="" decoding="async" />
         </div>
         <div className="hero-wash" aria-hidden="true" />
         <div className="hero-grid" aria-hidden="true" />

@@ -249,12 +249,27 @@ img {
 }
 
 .hero-media img {
+  /* Was a single photo running image-breathe. Now six stacked photos sharing
+     one crossfade + zoom loop — see "HERO SLIDESHOW" below the marker at the
+     bottom of this file. Slides are stacked, so they must be positioned. */
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center 50%;
+  /* Per-slide crop nudge: set --pos inline on a single slide when a photo's
+     subject sits too high or low for the default centre crop. The photos in
+     public/hero are already cropped to 16:9, so none currently need it. */
+  object-position: var(--pos, center 50%);
+  /* Deliberately on the img and not on .hero-media. Filtering each slide lets
+     the browser bake the filter into that layer once and then just transform
+     it; filtering the container would re-run it over the full viewport every
+     frame, because the container's contents are animating. */
   filter: saturate(0.75) contrast(1.08);
-  animation: image-breathe 14s ease-in-out infinite alternate;
+  opacity: 0;
+  animation:
+    hero-slide-fade var(--hero-cycle) linear infinite both,
+    hero-slide-zoom-in var(--hero-cycle) ease-out infinite both;
 }
 
 .hero-wash {
@@ -1584,11 +1599,6 @@ footer p:last-child {
   50% { translate: 0 -0.65rem; }
 }
 
-@keyframes image-breathe {
-  from { transform: scale(1.02); }
-  to { transform: scale(1.08); }
-}
-
 @keyframes pulse-ring {
   0% { opacity: 1; transform: scale(1); }
   70%, 100% { opacity: 0; transform: scale(3.2); }
@@ -1959,6 +1969,133 @@ footer p:last-child {
    Keep new rules below this line so the ported design stays easy to diff
    against the source it came from.
    ========================================================================== */
+
+/* ==========================================================================
+   HERO SLIDESHOW
+
+   Six photos stacked in .hero-media, crossfading on one shared loop, each
+   drifting through a slow zoom so the hero reads as footage rather than a
+   still. No JavaScript, no library, one timeline.
+
+   The photos live in public/hero/ numbered 01–06, in rotation order. Slot 01
+   is the flight window; the rest are Gillian's own. Swapping a photo is a file
+   swap — no CSS change. All six are pre-cropped to 16:9 at 2000x1125.
+
+   ---- Retuning the slide count -------------------------------------------
+   Keyframe selectors cannot be calc(), so the count is baked into the numbers
+   below. For N slides with a crossfade of F percent of the cycle:
+
+       share = 100 / N                    (16.6667% at N = 6)
+       visible from 0 until share - F      (13.3333%)
+       fade-out ends at share              (16.6667%)
+       fade back in over 100 - F, 100      (96.6667% -> 100%)
+       nth-child(i) delay = -cycle * (N - i + 1) / N
+
+   Every slide's fade-out lands exactly on the next slide's fade-in, so the loop
+   has no seam. Change N and you must edit both the keyframes and the delays.
+   ------------------------------------------------------------------------ */
+
+.hero-media {
+  /* 8s per slide at N = 6, with a 1.6s crossfade. Slow on purpose: a hero that
+     cuts every 3 seconds reads as a screensaver, and every transition is GPU
+     work on a page that is often open next to a video encoder. */
+  --hero-cycle: 48s;
+}
+
+/* A slide is fully visible at 0%, so the delays below are NEGATIVE and every
+   slide is already mid-loop on the first frame. With the fade-in at the start
+   instead, slide 1 would have to fade up from black on every page load — and
+   this page gets reloaded constantly on stream.
+
+   THE OUTGOING SLIDE NEVER FADES. It is worth understanding why, because the
+   obvious version of this — fade one out while the other fades in — visibly
+   dims the hero five times a loop. Opacity composites multiplicatively, not
+   additively: two slides at 0.5 over the ink background cover
+   1 - (0.5 x 0.5) = 0.75 of it, so 25% of the near-black page shows through at
+   the midpoint of every transition.
+
+   So instead the incoming slide fades in ON TOP of an outgoing slide that stays
+   fully opaque, and the outgoing only snaps to 0 once it is completely covered
+   at 20.01%. Coverage is then 1 - (1 - o) x (1 - 1) = 1 at every instant.
+
+   That needs the incoming slide to be above the outgoing one, which DOM order
+   alone cannot give (slide 1 follows slide 5 in the rotation but sits at the
+   bottom of the stack). Hence the z-index steps: 2 while incoming or leading,
+   1 while being covered. .hero-media has a z-index, so it is a stacking context
+   and these stay contained inside it. */
+@keyframes hero-slide-fade {
+  0% { opacity: 1; z-index: 2; }
+  13.3333% { opacity: 1; z-index: 2; }
+  13.3433% { opacity: 1; z-index: 1; }
+  16.6667% { opacity: 1; z-index: 1; }
+  16.6767% { opacity: 0; z-index: 1; }
+  96.6567% { opacity: 0; z-index: 1; }
+  96.6667% { opacity: 0; z-index: 2; }
+  100% { opacity: 1; z-index: 2; }
+}
+
+/* The zoom drifts across the visible window and snaps back at 20.01%, in the
+   same frame the fade snaps the slide to opacity 0 while it sits fully covered.
+   Animating it back instead would be invisible compositor work for the other
+   80% of the cycle.
+
+   Scale is 1 at both 0% and 100%, so it stays continuous across the loop
+   boundary: the slide holds still through its 96%->100% fade-in and starts
+   drifting the moment it is fully opaque.
+
+   `scale` rather than `transform: scale()`: it is an independent property, so
+   it composes with any transform instead of overwriting it. */
+@keyframes hero-slide-zoom-in {
+  0% { scale: 1; }
+  16.6667% { scale: 1.14; }
+  16.6767% { scale: 1; }
+  100% { scale: 1; }
+}
+
+@keyframes hero-slide-zoom-out {
+  0% { scale: 1.14; }
+  16.6667% { scale: 1; }
+  16.6767% { scale: 1.14; }
+  100% { scale: 1.14; }
+}
+
+/* Alternating direction is what keeps it from reading as a loop — five
+   identical push-ins in a row announce the mechanism. */
+.hero-media img:nth-child(even) {
+  animation-name: hero-slide-fade, hero-slide-zoom-out;
+}
+
+/* Negative, and counting DOWN, which looks backwards but is not: a negative
+   delay starts the animation already that far in, so a slide needs to be
+   further along to appear LATER in the rotation. Slide 2 at -80% reaches its
+   fade-in just as slide 1 fades out. Slide 1 needs no delay — it is the one
+   that must be visible on the first frame. */
+.hero-media img:nth-child(2) { animation-delay: calc(var(--hero-cycle) / -6 * 5); }
+.hero-media img:nth-child(3) { animation-delay: calc(var(--hero-cycle) / -6 * 4); }
+.hero-media img:nth-child(4) { animation-delay: calc(var(--hero-cycle) / -6 * 3); }
+.hero-media img:nth-child(5) { animation-delay: calc(var(--hero-cycle) / -6 * 2); }
+.hero-media img:nth-child(6) { animation-delay: calc(var(--hero-cycle) / -6 * 1); }
+
+/* The blanket reduced-motion rule further up sets animation-duration to 0.01ms
+   and iteration-count to 1. With fill-mode `both` that lands every slide on its
+   100% keyframe — opacity: 0 — and the hero goes black. Kill the animation
+   outright and show slide 01 as a still. */
+@media (prefers-reduced-motion: reduce) {
+  .hero-media img {
+    /* !important because the blanket rule up there forces animation-duration
+       with !important too. Setting animation-name alone loses: the animation
+       still runs for 0.01ms and fill-mode `both` lands every slide on its 100%
+       keyframe — opacity 1, z-index 2 — stacking all five opaque and showing
+       whichever happens to be last. The shorthand kills it outright. */
+    animation: none !important;
+    opacity: 0;
+    scale: 1;
+  }
+
+  .hero-media img:first-child {
+    opacity: 1;
+  }
+}
 
 /* Skip link. Invisible until focused, so it changes nothing visually. */
 .skip-link {

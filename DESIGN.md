@@ -98,10 +98,42 @@ more than they looked. Keep to these:
   a `box-shadow` pulse forever that rendered nothing at all, because the
   keyframes had no `0%` state to interpolate from.
 
-`.hero-media img` still runs `image-breathe` forever on a full-viewport
-filtered layer. That is the most expensive thing left on the page and it is
-kept deliberately — it is the hero's whole sense of life. Revisit it before
-adding anything else that runs continuously.
+## The hero slideshow
+
+`image-breathe` is gone. The hero is now six photographs stacked in
+`.hero-media`, crossfading on one shared 48s CSS loop with a slow alternating
+zoom — 8s a slide, no JavaScript. Full notes are in the `HERO SLIDESHOW` block
+at the bottom of `globals.css`; the two things worth knowing before touching it:
+
+- **The outgoing slide never fades.** Opacity composites multiplicatively, so
+  two slides at 0.5 cover only `1 - 0.5 × 0.5 = 0.75` of the background and the
+  hero visibly dims at every transition. Instead the incoming slide fades in on
+  top of a still-opaque outgoing one, which needs the animated `z-index` steps.
+- **The slide count is baked into the keyframe percentages**, because keyframe
+  selectors cannot be `calc()`. Changing it means editing the keyframes *and*
+  the `nth-child` delays. The formula is in the comment.
+
+Six full-viewport layers is the most expensive thing on the page, and it
+replaced something that was already the most expensive thing. Two are
+compositing at any moment and the rest sit idle at `opacity: 0`. Adding a
+seventh photo is not free — weigh it against the fact that this page is usually
+open next to a video encoder.
+
+## Photographs
+
+`public/hero/01-flight-window.jpg` is stock. **`02`–`06` are Gillian's own
+travel photographs** and should not be replaced with stock.
+
+All six are pre-cropped to 16:9 at 2000×1125 and encoded at JPEG q76 mozjpeg —
+1.6 MB for the set. Pre-cropping rather than leaving it to `object-fit` means
+the framing is chosen deliberately (four of the originals are portrait) and no
+bytes are spent on pixels that get cropped away.
+
+**Re-encoding also strips EXIF.** Every iPhone original carried a GPS IFD with
+the exact coordinates of where it was taken. Anything in `public/` is publicly
+downloadable, so originals live in `photo-originals/`, which is gitignored and
+never served. Run any new photo through the same pipeline rather than dropping
+a camera file straight into `public/hero/`.
 
 ## Still static, if you want it real later
 
