@@ -137,47 +137,47 @@ export default function HomePage() {
             <table className="departures-table">
               <thead>
                 <tr>
-                  <th scope="col">Time</th>
-                  <th scope="col">Destination</th>
-                  <th scope="col">Flight</th>
-                  <th scope="col">Gate</th>
-                  <th scope="col">Remarks</th>
+                  <th scope="col">TIME</th>
+                  <th scope="col">DESTINATION</th>
+                  <th scope="col">FLIGHT</th>
+                  <th scope="col">GATE</th>
+                  <th scope="col">REMARKS</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td>NOW</td>
-                  <td>PHUKET</td>
+                  <td>FIRST DEPARTURE</td>
                   <td>BBP 001</td>
                   <td>01</td>
                   <td className="status-boarding">BOARDING</td>
                 </tr>
                 <tr>
-                  <td>--:--</td>
-                  <td>SOMEWHERE NEXT</td>
+                  <td>OPEN</td>
+                  <td>THE TERMINAL</td>
+                  <td>CMD 001</td>
+                  <td>&gt;</td>
+                  <td className="status-open">TYPE /HELP</td>
+                </tr>
+                <tr>
+                  <td>TODAY</td>
+                  <td>DEPARTURE CODE</td>
+                  <td>???</td>
+                  <td>—</td>
+                  <td>DECODE</td>
+                </tr>
+                <tr>
+                  <td>NEXT</td>
+                  <td>UNFINISHED TERRITORY</td>
                   <td>BBP 002</td>
-                  <td>--</td>
-                  <td className="status-open">ROUTE OPEN</td>
-                </tr>
-                <tr>
-                  <td>--:--</td>
-                  <td>THE LONG WAY</td>
-                  <td>BBP 003</td>
-                  <td>--</td>
-                  <td>UNCONFIRMED</td>
-                </tr>
-                <tr>
-                  <td>TONIGHT</td>
-                  <td>FIRST DRAFT</td>
-                  <td>BLD 404</td>
-                  <td>07</td>
-                  <td className="status-boarding">SHIPPING</td>
+                  <td>—</td>
+                  <td>MILES NEEDED</td>
                 </tr>
                 <tr>
                   <td>NEVER</td>
-                  <td>PERFECT PLAN</td>
-                  <td>-- ----</td>
-                  <td>--</td>
+                  <td>WAITING FOR PERFECT</td>
+                  <td>—</td>
+                  <td>—</td>
                   <td className="status-cancelled">CANCELLED</td>
                 </tr>
               </tbody>
