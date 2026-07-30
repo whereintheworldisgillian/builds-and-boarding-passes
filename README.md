@@ -51,6 +51,7 @@ app/
   layout.tsx     html shell, metadata, skip link
   page.tsx       THE ENTIRE PAGE — all content and structure
   terminal.tsx   floating terminal button + panel (the one client component)
+  commands.ts    the terminal's command set — THE FILE TO EDIT for commands
   globals.css    THE ENTIRE VISUAL SYSTEM — ~2200 lines of plain CSS
 public/
   fonts/         Geist Sans + Geist Mono, self-hosted woff2
@@ -67,6 +68,7 @@ handed over.
 | What | Where |
 | --- | --- |
 | Any words, any section, the departure rows | `app/page.tsx` |
+| The terminal's commands, their text, and the links | `app/commands.ts` |
 | The terminal's welcome text or button label | `app/terminal.tsx` |
 | Where the terminal button sits | `.terminal-launch` in `app/globals.css` |
 | Any colour, spacing, type, motion | `app/globals.css` |

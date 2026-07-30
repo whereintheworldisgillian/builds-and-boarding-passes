@@ -2201,8 +2201,17 @@ footer p:last-child {
 /* ---- The panel -------------------------------------------------------- */
 
 .terminal-panel {
-  /* Clears the launcher, which is 2.4rem tall plus its own bottom offset. */
-  bottom: calc(max(1.15rem, env(safe-area-inset-bottom, 0px)) + 3.35rem);
+  /* Named, because the log's max-height has to be derived from it — the panel
+     grows upward from here and must not run past the top of the screen. */
+  --terminal-bottom: calc(max(1.15rem, env(safe-area-inset-bottom, 0px)) + 3.35rem);
+  /* Header, pinned suggestion row and input row — the fixed chrome around the
+     scrolling log. Update this if you add another pinned row, or the log will
+     stop shrinking to compensate and the panel can outgrow the screen. */
+  --terminal-chrome: 8.5rem;
+  /* Breathing room left above the panel, which also keeps it off the fixed nav. */
+  --terminal-headroom: 5.5rem;
+
+  bottom: var(--terminal-bottom);
   width: min(23.5rem, calc(100vw - 2.3rem));
   overflow: hidden;
   color: var(--paper-bright);
@@ -2290,16 +2299,47 @@ footer p:last-child {
   border-color: rgba(255, 255, 255, 0.4);
 }
 
-.terminal-panel-body {
-  display: grid;
-  gap: 0.55rem;
-  padding: 1.05rem 0.95rem 1.15rem;
-  font-size: 0.8rem;
-  line-height: 1.6;
+/* /board scrolls here, and the nav is fixed over the top of the page, so the
+   board's heading would otherwise land underneath it. Scoped to this one target
+   rather than set globally as scroll-padding-top on <html>: that would change
+   every existing anchor in the nav, which is outside this feature. */
+#board {
+  scroll-margin-top: 5.5rem;
 }
 
-.terminal-panel-body p {
+/* ---- The scrollback ---------------------------------------------------- */
+
+.terminal-log {
+  /* Positioned so it is the offsetParent of its children: the scroll anchoring
+     in terminal.tsx reads entry.offsetTop, which would otherwise be measured
+     from the panel and overshoot by the height of the header. */
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.7rem;
+  /* The panel is bottom-anchored, so it grows upward. This scrolls instead of
+     letting the panel run off the top of the screen — derived from where the
+     panel actually sits, so it stays correct at both breakpoints. dvh so a
+     phone's collapsing address bar does not clip it. */
+  max-height: min(
+    26rem,
+    calc(100dvh - var(--terminal-bottom) - var(--terminal-chrome) - var(--terminal-headroom))
+  );
+  padding: 1rem 0.95rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-size: 0.8rem;
+  line-height: 1.6;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.22) transparent;
+}
+
+.terminal-log p {
   margin: 0;
+}
+
+.terminal-greeting {
+  color: var(--paper-bright);
 }
 
 /* Tinted from the paper hue rather than dropped to grey, so the secondary line
@@ -2308,18 +2348,179 @@ footer p:last-child {
   color: rgba(241, 238, 229, 0.68);
 }
 
-.terminal-panel-prompt {
-  display: flex;
-  align-items: baseline;
-  margin-top: 0.15rem;
+/* The echoed command, so the log reads as a transcript. */
+.terminal-echo {
+  color: rgba(241, 238, 229, 0.6);
+}
+
+.terminal-echo span {
   color: var(--acid);
 }
 
-.terminal-panel:focus-visible {
-  /* The global ring sits 4px outside, which a fixed panel at the viewport edge
-     would clip. Draw it inside instead. */
-  outline: 2px solid var(--orange);
-  outline-offset: -2px;
+.terminal-reply {
+  display: grid;
+  gap: 0.3rem;
+}
+
+/* Not-yet-built replies carry the departure board's amber, the same colour the
+   header's STANDBY chip uses. Unbuilt reads as scheduled, not as broken. */
+.terminal-reply[data-tone="pending"] {
+  color: #ebef48;
+}
+
+.terminal-reply[data-tone="error"] {
+  color: #ff8a63;
+}
+
+/* ---- Starter chips and the /help table -------------------------------- */
+
+/* Pinned above the input rather than living in the log, so it never scrolls out
+   of reach. Counted in --terminal-chrome. */
+.terminal-suggest {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0.95rem;
+  border-top: 1px solid var(--white-line);
+}
+
+.terminal-suggest-label {
+  color: rgba(241, 238, 229, 0.55);
+  font-size: 0.54rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.terminal-suggest ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.terminal-chip {
+  padding: 0.3rem 0.5rem;
+  color: var(--acid);
+  background: rgba(217, 255, 111, 0.07);
+  border: 1px solid rgba(217, 255, 111, 0.3);
+  border-radius: 0.35rem;
+  font: inherit;
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.terminal-chip:hover {
+  background: rgba(217, 255, 111, 0.16);
+  border-color: rgba(217, 255, 111, 0.6);
+}
+
+.terminal-help {
+  display: grid;
+  gap: 0.45rem;
+  margin: 0;
+}
+
+.terminal-help > div {
+  display: grid;
+  /* The command column sizes to the longest name so the descriptions line up,
+     then collapses to stacked rows when there is not room for two columns. */
+  grid-template-columns: minmax(5.5rem, auto) 1fr;
+  align-items: baseline;
+  gap: 0.3rem 0.7rem;
+}
+
+.terminal-help dt {
+  display: flex;
+}
+
+.terminal-help dd {
+  margin: 0;
+  color: rgba(241, 238, 229, 0.72);
+  font-size: 0.74rem;
+  line-height: 1.45;
+}
+
+/* ---- The input row ---------------------------------------------------- */
+
+.terminal-form {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 0.7rem 0.6rem 0.95rem;
+  border-top: 1px solid var(--white-line);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+/* Visible to assistive tech only. The prompt glyph is the visual label. */
+.terminal-form-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.terminal-form-prompt {
+  color: var(--acid);
+  font-size: 0.85rem;
+}
+
+.terminal-input {
+  min-width: 0;
+  padding: 0.35rem 0;
+  color: var(--paper-bright);
+  background: none;
+  border: 0;
+  font: inherit;
+  /* 16px, because iOS Safari zooms the page when a focused input is smaller.
+     Stepped down on pointer-and-hover devices, where that does not apply. */
+  font-size: 1rem;
+}
+
+.terminal-input::placeholder {
+  color: rgba(241, 238, 229, 0.42);
+}
+
+.terminal-input:focus-visible {
+  /* The row is the visible focus surface; a ring around the bare input inside a
+     bordered row reads as a double box. */
+  outline: none;
+}
+
+.terminal-form:focus-within {
+  background: rgba(217, 255, 111, 0.06);
+  box-shadow: inset 0 1px 0 rgba(217, 255, 111, 0.4);
+}
+
+.terminal-run {
+  padding: 0.4rem 0.6rem;
+  color: var(--ink);
+  background: var(--acid);
+  border: 0;
+  border-radius: 0.35rem;
+  font: inherit;
+  font-size: 0.6rem;
+  font-weight: 750;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  transition: background-color 150ms ease;
+}
+
+.terminal-run:hover {
+  background: white;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .terminal-input {
+    font-size: 0.85rem;
+  }
 }
 
 /* Above this width .boarding-pass exists and owns the bottom-right corner, so
@@ -2342,7 +2543,8 @@ footer p:last-child {
   }
 
   .terminal-panel {
-    bottom: 9.2rem;
+    /* The log's max-height follows this automatically. */
+    --terminal-bottom: 9.2rem;
   }
 }
 

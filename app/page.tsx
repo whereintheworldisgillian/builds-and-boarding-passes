@@ -122,7 +122,8 @@ export default function HomePage() {
         </a>
       </section>
 
-      <section className="departures" aria-labelledby="departures-title">
+      {/* id is the /board command's scroll target. */}
+      <section className="departures" id="board" aria-labelledby="departures-title">
         <div className="departures-shell">
           <header className="departures-header">
             <div className="departures-title">

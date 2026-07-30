@@ -141,10 +141,42 @@ a camera file straight into `public/hero/`.
 `page.tsx` stays a server component; the interactive corner is isolated so the
 rest of the page still ships as static markup with nothing attached to it.
 
-Phase one is a shell on purpose. The panel says commands are coming and there is
-no input to type into, because the project's rule is that nothing pretends to
-work — hence the amber `STANDBY` chip borrowed from the departures board rather
-than a green "ready".
+The command set lives in **`app/commands.ts`**, which is the file to edit. Adding
+a command is one entry in `COMMANDS`; `terminal.tsx` renders whatever is there
+and needs no changes.
+
+Replies are typed as a small union — `help`, `lines`, `scroll`, `open` — and each
+renders in one of three tones:
+
+| Tone | Colour | Means |
+| --- | --- | --- |
+| normal | paper | Real, working now |
+| pending | board amber `#ebef48` | Exists as a plan, not yet built |
+| error | soft orange | Unknown command, names the recovery |
+
+That amber is the departures board's own "route open" colour, and the header
+carries a `STANDBY` chip in it. Unbuilt reads as *scheduled*, not as broken —
+which is the project's rule that nothing pretends to work, expressed in colour.
+
+**Pending copy is visitor-facing.** `/live` says the livestream is not linked
+yet, not "add it to LINKS.livestream" — wiring instructions live in the code
+comment on `LINKS`, never on screen.
+
+Two interaction details worth keeping:
+
+- **The suggestion chips are pinned above the input, outside the scrolling log.**
+  They started inside it and disappeared after the first command, which is
+  exactly when someone who does not know what to type still needs them.
+- **New output scrolls the newest echo to the top of the log, not the bottom.**
+  `/help` is taller than the log, so scrolling to the bottom would land the
+  visitor on the last row with the command they just ran off-screen above. This
+  is why `.terminal-log` is `position: relative` — the anchoring reads
+  `offsetTop`, which would otherwise be measured from the panel.
+
+The panel's height is derived, not fixed: `--terminal-bottom`,
+`--terminal-chrome` and `--terminal-headroom` feed the log's `max-height`, so the
+panel can never grow past the top of the screen. **Add another pinned row and
+`--terminal-chrome` must grow with it**, or that guarantee breaks.
 
 Two details that are load-bearing and easy to undo by accident:
 
