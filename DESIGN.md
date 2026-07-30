@@ -135,6 +135,33 @@ downloadable, so originals live in `photo-originals/`, which is gitignored and
 never served. Run any new photo through the same pipeline rather than dropping
 a camera file straight into `public/hero/`.
 
+## The terminal
+
+`app/terminal.tsx` is the **first and only client component** in the app.
+`page.tsx` stays a server component; the interactive corner is isolated so the
+rest of the page still ships as static markup with nothing attached to it.
+
+Phase one is a shell on purpose. The panel says commands are coming and there is
+no input to type into, because the project's rule is that nothing pretends to
+work — hence the amber `STANDBY` chip borrowed from the departures board rather
+than a green "ready".
+
+Two details that are load-bearing and easy to undo by accident:
+
+- **The notched corner lives on an inner `<span>`, not the button.** It is the
+  nav chip's `clip-path`, and `clip-path` on a focusable element crops its own
+  focus ring. The button stays unclipped so the orange ring can sit outside it.
+- **The position is derived from the boarding pass, not chosen.** The obvious
+  bottom-right corner is already `.boarding-pass` (measured 331×274 at 1280×720,
+  leaving 46px to its right). Above 1101px the launcher tucks in to the pass's
+  left using the pass's own geometry — `clamp(320px, 23vw, 360px)`, because the
+  pass's `min-width` wins below ~1565px and `rotate(2.5deg)` grows its box by
+  about 12px. Below 1101px the pass is not rendered and the launcher takes the
+  real corner. Verified collision-free from 1101px to 1920px, and at 320/390px.
+
+The caret blinks only on hover, focus, or while open. A cursor blinking forever
+in the corner would repaint for the life of the page for no reason.
+
 ## Still static, if you want it real later
 
 - The departures clock (`18:03`) is a hardcoded `<time>`, not a live clock.

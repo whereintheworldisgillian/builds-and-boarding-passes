@@ -50,7 +50,8 @@ the Next.js framework preset; nothing else needs configuring.
 app/
   layout.tsx     html shell, metadata, skip link
   page.tsx       THE ENTIRE PAGE — all content and structure
-  globals.css    THE ENTIRE VISUAL SYSTEM — ~1900 lines of plain CSS
+  terminal.tsx   floating terminal button + panel (the one client component)
+  globals.css    THE ENTIRE VISUAL SYSTEM — ~2200 lines of plain CSS
 public/
   fonts/         Geist Sans + Geist Mono, self-hosted woff2
   hero/          the six hero slideshow photographs, 01–06 in rotation order
@@ -66,6 +67,8 @@ handed over.
 | What | Where |
 | --- | --- |
 | Any words, any section, the departure rows | `app/page.tsx` |
+| The terminal's welcome text or button label | `app/terminal.tsx` |
+| Where the terminal button sits | `.terminal-launch` in `app/globals.css` |
 | Any colour, spacing, type, motion | `app/globals.css` |
 | The photographs | `public/*.jpg` — keep the filenames |
 | A hero slideshow photo | swap the file in `public/hero/` — no code change |

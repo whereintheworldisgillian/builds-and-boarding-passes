@@ -1,3 +1,5 @@
+import Terminal from "./terminal";
+
 export default function HomePage() {
   return (
     <main id="top">
@@ -342,6 +344,11 @@ export default function HomePage() {
         <p>Builds &amp; Boarding Passes · World Tour 001</p>
         <p>Made somewhere between here and next.</p>
       </footer>
+
+      {/* Fixed to the viewport, so it sits last in the document — after the
+          footer it is the final stop for keyboard users rather than an
+          interruption between sections. */}
+      <Terminal />
     </main>
   );
 }

@@ -2097,6 +2097,269 @@ footer p:last-child {
   }
 }
 
+/* ==========================================================================
+   TERMINAL — floating launcher + console panel
+
+   Styled as gate furniture rather than a chat widget: the notched corner is the
+   nav chip's shape, the type is the departure board's mono at the same size and
+   tracking as the route rail, and the status word borrows the board's own
+   vocabulary. It should read as another bottom-anchored instrument in the hero,
+   not as something bolted on afterwards.
+
+   ---- On the position ----------------------------------------------------
+   The obvious bottom-right corner is already taken. .boarding-pass is anchored
+   there (right: 4vw, bottom: 2.6rem, min-width 320px) and measures 331x274 at
+   1280x720, leaving 46px to its right and a 182px gap between it and the
+   centred scroll cue — not enough for a labelled chip at any desktop width, and
+   the gap closes completely around 1101px.
+
+   So above 1101px the launcher tucks in immediately to the LEFT of the pass and
+   a little above the scroll cue, joining the row of instruments already along
+   the bottom of the hero. Below 1101px the pass is not rendered at all and the
+   launcher takes the true bottom-right corner. Both offsets are derived from the
+   pass's own geometry, so they track it if it moves.
+   ------------------------------------------------------------------------ */
+
+.terminal-launch,
+.terminal-panel {
+  /* Under the skip link (100), above the hero's own layers. */
+  z-index: 90;
+  position: fixed;
+  right: max(1.15rem, env(safe-area-inset-right, 0px));
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.terminal-launch {
+  bottom: max(1.15rem, env(safe-area-inset-bottom, 0px));
+  padding: 0;
+  border: 0;
+  background: none;
+  /* The chip itself is the inner face, so the focus ring can sit outside it. */
+  line-height: 0;
+}
+
+.terminal-launch-face {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  /* 44px, so the chip clears the minimum touch target on a phone. The type is
+     board-sized, so this is padding rather than a bigger font. */
+  min-height: 2.75rem;
+  padding: 0.7rem 0.9rem;
+  color: var(--paper-bright);
+  background: rgba(16, 24, 26, 0.93);
+  border: 1px solid var(--white-line);
+  clip-path: polygon(0 0, calc(100% - 0.62rem) 0, 100% 0.62rem, 100% 100%, 0 100%);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+  line-height: 1;
+  text-transform: uppercase;
+  /* Offset and blur, so it reads as a raised object rather than a halo. */
+  box-shadow: 0 0.7rem 1.6rem rgba(0, 0, 0, 0.42);
+  transition: transform 180ms ease, border-color 180ms ease,
+    background-color 180ms ease, box-shadow 180ms ease;
+}
+
+.terminal-launch-prompt {
+  display: inline-flex;
+  align-items: baseline;
+  color: var(--acid);
+}
+
+/* The caret only blinks on hover, focus, or while the panel is open. A cursor
+   blinking forever in the corner is exactly the attention-seeking idle the
+   brief rules out, and it would repaint for the life of the page. */
+.terminal-caret {
+  display: inline-block;
+  width: 0.42em;
+  height: 1em;
+  margin-left: 0.12em;
+  background: currentColor;
+  vertical-align: baseline;
+}
+
+.terminal-launch:hover .terminal-launch-face,
+.terminal-launch:focus-visible .terminal-launch-face {
+  border-color: rgba(217, 255, 111, 0.55);
+  background: var(--ink-soft);
+  transform: translateY(-2px);
+  box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.5);
+}
+
+.terminal-launch:hover .terminal-caret,
+.terminal-launch:focus-visible .terminal-caret,
+.terminal-launch[aria-expanded="true"] .terminal-caret {
+  animation: terminal-blink 1.05s steps(1, end) infinite;
+}
+
+@keyframes terminal-blink {
+  0%, 55% { opacity: 1; }
+  55.01%, 100% { opacity: 0; }
+}
+
+/* ---- The panel -------------------------------------------------------- */
+
+.terminal-panel {
+  /* Clears the launcher, which is 2.4rem tall plus its own bottom offset. */
+  bottom: calc(max(1.15rem, env(safe-area-inset-bottom, 0px)) + 3.35rem);
+  width: min(23.5rem, calc(100vw - 2.3rem));
+  overflow: hidden;
+  color: var(--paper-bright);
+  background: rgba(16, 24, 26, 0.97);
+  border: 1px solid var(--white-line);
+  border-radius: 0.9rem;
+  box-shadow: 0 1.5rem 3.5rem rgba(0, 0, 0, 0.55);
+  animation: terminal-open 260ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes terminal-open {
+  from { opacity: 0; translate: 0 0.6rem; }
+  to { opacity: 1; translate: 0 0; }
+}
+
+.terminal-panel-head {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.7rem 0.7rem 0.95rem;
+  border-bottom: 1px solid var(--white-line);
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.terminal-panel-title {
+  font-size: 0.54rem;
+  font-weight: 750;
+  letter-spacing: 0.11em;
+  line-height: 1.35;
+  text-transform: uppercase;
+}
+
+.terminal-panel-state {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  /* The board's own "route open" amber. Honest: the terminal is not live yet. */
+  color: #ebef48;
+  /* Matches .pass-heading, so the header keeps the boarding pass's label size. */
+  font-size: 0.54rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.terminal-panel-state i {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.terminal-panel-close {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  padding: 0;
+  color: var(--paper-bright);
+  background: none;
+  border: 1px solid var(--white-line);
+  border-radius: 0.4rem;
+  font-size: 0.95rem;
+  line-height: 1;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+/* The box stays small so the header stays compact, but the tappable area is
+   grown to 44px around it rather than left at 27px. */
+.terminal-panel-close::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2.75rem;
+  height: 2.75rem;
+  translate: -50% -50%;
+}
+
+.terminal-panel-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.terminal-panel-body {
+  display: grid;
+  gap: 0.55rem;
+  padding: 1.05rem 0.95rem 1.15rem;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.terminal-panel-body p {
+  margin: 0;
+}
+
+/* Tinted from the paper hue rather than dropped to grey, so the secondary line
+   still belongs to the palette. */
+.terminal-panel-dim {
+  color: rgba(241, 238, 229, 0.68);
+}
+
+.terminal-panel-prompt {
+  display: flex;
+  align-items: baseline;
+  margin-top: 0.15rem;
+  color: var(--acid);
+}
+
+.terminal-panel:focus-visible {
+  /* The global ring sits 4px outside, which a fixed panel at the viewport edge
+     would clip. Draw it inside instead. */
+  outline: 2px solid var(--orange);
+  outline-offset: -2px;
+}
+
+/* Above this width .boarding-pass exists and owns the bottom-right corner, so
+   both launcher and panel step to its left. The offsets are expressed in the
+   pass's own terms: 4vw of page gutter, its width, then a gap. */
+@media (min-width: 1101px) {
+  .terminal-launch,
+  .terminal-panel {
+    /* The pass's own width, not min(23vw, 360px): it also carries
+       min-width: 320px, which wins below ~1565px, and rotate(2.5deg) grows its
+       bounding box by about 12px. clamp() covers the first, the 2.1rem covers
+       the rotation plus a real gap. */
+    right: calc(4vw + clamp(320px, 23vw, 360px) + 2.1rem);
+  }
+
+  .terminal-launch {
+    /* Sits above the scroll cue, which is also bottom-anchored, so this keeps a
+       constant ~19px clearance at every viewport height. */
+    bottom: 6.2rem;
+  }
+
+  .terminal-panel {
+    bottom: 9.2rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No lift and no blink. The panel still needs to appear, but the blanket rule
+     further up collapses the duration to 0.01ms, which is the intent here. */
+  .terminal-launch:hover .terminal-launch-face,
+  .terminal-launch:focus-visible .terminal-launch-face {
+    transform: none;
+  }
+
+  .terminal-caret {
+    animation: none !important;
+    opacity: 1;
+  }
+}
+
 /* Skip link. Invisible until focused, so it changes nothing visually. */
 .skip-link {
   position: fixed;
