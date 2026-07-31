@@ -2819,7 +2819,20 @@ footer p:last-child {
   outline-offset: 1px;
 }
 
+/* Reserved whether or not there is a message, so the panel is exactly the same
+   height either way and nothing below it moves. Sized to two lines, which is
+   what the longest message wraps to in the narrowest field. */
+.checkin-error-slot {
+  position: relative;
+  min-height: 2.35rem;
+}
+
+/* Absolute inside that slot, so even a message longer than the reserve cannot
+   push the Board button down — it is the target being aimed at when the error
+   appears. */
 .checkin-error {
+  position: absolute;
+  inset: 0;
   margin: 0;
   color: #ff8a63;
   font-size: 0.78rem;

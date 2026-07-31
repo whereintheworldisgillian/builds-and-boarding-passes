@@ -275,11 +275,14 @@ export default function CheckinDialog() {
               />
             </div>
 
-            {error && (
-              <p className="checkin-error" id={errorId} role="alert">
-                {error}
-              </p>
-            )}
+            {/* The slot is always in the DOM, empty or not. Two reasons: the
+                panel keeps exactly one height, so an error never shoves the
+                Board button down while someone is reaching for it; and a live
+                region has to exist before its contents change or screen readers
+                miss the first message. */}
+            <div className="checkin-error-slot" id={errorId} role="alert">
+              {error && <p className="checkin-error">{error}</p>}
+            </div>
 
             <button type="submit" className="checkin-board">
               Board
