@@ -748,16 +748,22 @@ img {
   transform: translateX(0.25rem);
 }
 
-.departures-table .status-boarding {
+/* Shared with the terminal's /board printout, which renders the same rows from
+   app/departures.ts. One declaration, so a status can never mean green on the
+   page and something else in the console. */
+.departures-table .status-boarding,
+.terminal-board [data-status="boarding"] {
   color: #32e24e;
   text-shadow: 0 0 0.65rem rgba(50, 226, 78, 0.34);
 }
 
-.departures-table .status-open {
+.departures-table .status-open,
+.terminal-board [data-status="open"] {
   color: #ebef48;
 }
 
-.departures-table .status-cancelled {
+.departures-table .status-cancelled,
+.terminal-board [data-status="cancelled"] {
   color: #f44444;
   text-shadow: 0 0 0.65rem rgba(244, 68, 68, 0.34);
 }
@@ -2382,6 +2388,13 @@ footer p:last-child {
   gap: 0.3rem;
 }
 
+/* Runs of spaces survive, so a reply can align itself into columns the way
+   terminal output does — /toolkit pads its labels and would otherwise collapse
+   to single spaces. Still wraps at the panel edge, unlike plain `pre`. */
+.terminal-reply p {
+  white-space: pre-wrap;
+}
+
 /* Not-yet-built replies carry the departure board's amber, the same colour the
    header's STANDBY chip uses. Unbuilt reads as scheduled, not as broken. */
 .terminal-reply[data-tone="pending"] {
@@ -2463,6 +2476,88 @@ footer p:last-child {
   color: rgba(241, 238, 229, 0.72);
   font-size: 0.74rem;
   line-height: 1.45;
+}
+
+/* /help is grouped by whether a command does anything yet. The scheduled group
+   inherits the same amber the pending replies use, so the index and the replies
+   tell the same story: unbuilt is on the roadmap, not broken. */
+.terminal-help-block {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.terminal-help-heading {
+  margin: 0 0 0.45rem;
+  color: rgba(241, 238, 229, 0.55);
+  font-size: 0.54rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.terminal-help-block [data-tone="pending"] .terminal-help-heading {
+  color: #ebef48;
+}
+
+.terminal-help-block [data-tone="pending"] .terminal-chip {
+  color: #ebef48;
+  background: rgba(235, 239, 72, 0.07);
+  border-color: rgba(235, 239, 72, 0.3);
+}
+
+.terminal-help-block [data-tone="pending"] .terminal-chip:hover {
+  background: rgba(235, 239, 72, 0.16);
+  border-color: rgba(235, 239, 72, 0.6);
+}
+
+.terminal-help-keys {
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--white-line);
+  color: rgba(241, 238, 229, 0.5);
+  font-size: 0.68rem;
+  line-height: 1.5;
+}
+
+/* ---- The /board printout ---------------------------------------------- */
+
+/* A grid rather than space-padded text: five aligned columns need about 41
+   monospace characters, and the log is only ~42 wide on a 390px phone. The
+   grid lets DESTINATION wrap instead of overflowing, and the console shows
+   three columns — FLIGHT and GATE stay on the page, which is where /board
+   sends you. */
+.terminal-board {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  line-height: 1.4;
+}
+
+.terminal-board > div {
+  display: grid;
+  grid-template-columns: 3.2rem 1fr auto;
+  align-items: baseline;
+  gap: 0.2rem 0.55rem;
+}
+
+.terminal-board span:first-child {
+  color: rgba(241, 238, 229, 0.5);
+}
+
+.terminal-board b {
+  font-weight: 400;
+  color: var(--paper-bright);
+}
+
+/* :not([data-status]) is load-bearing, not decoration. The shared status colours
+   live with .departures-table further up the file, so a bare `span:last-child`
+   would beat them on both specificity and source order and every remark would
+   render the same grey. */
+.terminal-board span:last-child {
+  text-align: right;
+}
+
+.terminal-board span:last-child:not([data-status]) {
+  color: rgba(241, 238, 229, 0.72);
 }
 
 /* ---- The input row ---------------------------------------------------- */

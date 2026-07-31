@@ -217,8 +217,8 @@ The command set lives in **`app/commands.ts`**, which is the file to edit. Addin
 a command is one entry in `COMMANDS`; `terminal.tsx` renders whatever is there
 and needs no changes.
 
-Replies are typed as a small union — `help`, `lines`, `scroll`, `open` — and each
-renders in one of three tones:
+Replies are typed as a small union — `help`, `lines`, `scroll`, `board`, `open` —
+and each renders in one of three tones:
 
 | Tone | Colour | Means |
 | --- | --- | --- |
@@ -233,6 +233,63 @@ which is the project's rule that nothing pretends to work, expressed in colour.
 **Pending copy is visitor-facing.** `/live` says the livestream is not linked
 yet, not "add it to LINKS.livestream" — wiring instructions live in the code
 comment on `LINKS`, never on screen.
+
+### /help groups itself
+
+`/help` is split into **Working now** and **Scheduled**, the scheduled group
+carrying the same amber as a pending reply — so the index and the replies tell
+the same story.
+
+**Membership is asked, not stored.** `isLive()` calls `command.reply()` and reads
+the result: `lines` with `pending`, or `open` with a `null` URL, means scheduled.
+`reply` is already call-time evaluated so `LINKS` can be edited without a
+rebuild, and this rides on that — paste a Discord URL and `/discord` moves groups
+by itself. A `status` field on the command would sit there lying about it.
+
+The consequence: **a command's group is a side effect of how honest its reply
+is.** That is deliberate. There is no way to advertise something as working
+without also making it work.
+
+### Commands that are found, not listed
+
+`hidden: true` keeps a command out of `/help`, the chips and tab completion,
+while `findCommand` still resolves it. `/vibe` is the only one.
+
+### The /board printout
+
+`/board` prints the board before sending you to it, and the rows come from
+**`app/departures.ts`**, which `page.tsx` also renders. One source, so the
+console and the page cannot drift apart.
+
+The console shows three columns, the page shows five. That is a width decision:
+five aligned columns need ~41 monospace characters and the log is ~42 wide on a
+390px phone. It is a CSS grid rather than space-padded text so `DESTINATION` can
+wrap instead of overflowing.
+
+**`/board` does not close the panel on a desktop.** Plain `scroll` replies do —
+on a phone the panel covers the destination. But this one printed something
+first, and closing would throw it away, so the close is gated behind the same
+`(hover: hover) and (pointer: fine)` query the stylesheet uses.
+
+`.terminal-reply p` is `white-space: pre-wrap` so a reply can align itself into
+columns — `/toolkit` pads its labels and would otherwise collapse to single
+spaces. Still wraps at the panel edge, unlike plain `pre`.
+
+### Keyboard
+
+Tab completes, ↑/↓ walk history, Esc closes, **⌘K / Ctrl+K opens from anywhere.**
+
+Two things not to undo:
+
+- **⌘K is a modifier combo on purpose.** A bare `/` would be a single-character
+  shortcut, which WCAG 2.1.4 requires be remappable or focus-scoped. This one has
+  no reason to be either.
+- **Tab is only swallowed when it has something to complete.** On an empty or
+  unmatched field it falls through to normal focus movement, or the input becomes
+  a trap with no keyboard way out.
+
+Unknown input names the near miss — `suggest()` tries prefix first, then a small
+edit distance so `/boadr` still lands on `/board`.
 
 Two interaction details worth keeping:
 

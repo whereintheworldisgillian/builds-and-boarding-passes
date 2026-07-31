@@ -38,6 +38,8 @@ export type Reply =
   | { kind: "lines"; lines: string[]; pending?: boolean }
   /** Print lines, close the panel, and scroll to a section on the page. */
   | { kind: "scroll"; selector: string; lines: string[] }
+  /** Print the departure board, then scroll to the real one. */
+  | { kind: "board"; selector: string; lines: string[] }
   /** Open a URL in a new tab, or explain that there is not one yet. */
   | { kind: "open"; url: string | null; lines: string[]; pendingLines: string[] };
 
@@ -48,6 +50,11 @@ export type Command = {
   summary: string;
   /** Offered as a starter chip to people who do not know what to type. */
   suggested?: boolean;
+  /**
+   * Kept out of /help, the starter chips, and tab completion — but still
+   * runnable. For things that are meant to be found rather than listed.
+   */
+  hidden?: boolean;
   /** Evaluated at call time, so LINKS can be edited without a rebuild. */
   reply: () => Reply;
 };
@@ -61,12 +68,15 @@ export const COMMANDS: Command[] = [
   },
   {
     name: "board",
-    summary: "Opens the current departure board",
+    summary: "Prints the departure board, then goes to it",
     suggested: true,
+    // Prints first, because reading a departures board inside a terminal is
+    // the most on-brand thing this site can do, then sends them to the full
+    // five-column version on the page. Rows come from ./departures.
     reply: () => ({
-      kind: "scroll",
+      kind: "board",
       selector: "#board",
-      lines: ["Departure board, coming up."],
+      lines: ["Full board on the page."],
     }),
   },
   {
@@ -128,13 +138,28 @@ export const COMMANDS: Command[] = [
   },
   {
     name: "toolkit",
-    summary: "Opens the Claude resources, skills, tools, and tips",
+    summary: "Shows what this site is actually built with",
+    // Deliberately not a starter chip. A fifth chip measures ~318px against
+    // ~323px of usable row on a 390px phone, so it wraps to a second line —
+    // and the pinned rows are budgeted in --terminal-chrome, which the log's
+    // max-height is derived from. /help lists it under "Working now" instead.
+    // Every line is checkable against package.json and the tree, which is the
+    // point — the honest answer to "what did you use to make this?" rather
+    // than a promise of a write-up that does not exist yet.
+    //
+    // The labels are padded to align in the panel's mono face. Keep any line
+    // under about 42 characters or it wraps on a phone.
     reply: () => ({
       kind: "lines",
-      pending: true,
       lines: [
-        "Toolkit — coming in Phase 1.",
-        "The skills, tools and prompts used to build this, written up.",
+        "What this site is actually built with:",
+        "Framework   Next.js 16",
+        "UI          React 19",
+        "Types       TypeScript, strict",
+        "Styling     Plain CSS",
+        "Model       Claude Opus 5",
+        "No UI kit, no CSS-in-JS, no animation library.",
+        "One page, one stylesheet, one client component.",
       ],
     }),
   },
@@ -159,10 +184,90 @@ export const COMMANDS: Command[] = [
       ],
     }),
   },
+  {
+    // Hidden on purpose. Not in /help, not a chip, not tab-completable — the
+    // reward is for trying the word this whole project is named after.
+    name: "vibe",
+    summary: "—",
+    hidden: true,
+    reply: () => ({
+      kind: "lines",
+      lines: [
+        "VIBE CHECK — PASSED",
+        "Commits: unsquashed. Variables: named `thing2`.",
+        "Tests: aspirational. Shipped anyway.",
+        "That is the whole method.",
+      ],
+    }),
+  },
 ];
+
+/** Strips the slash, case and padding so "/Help", "\help" and " help " all match. */
+function normalize(raw: string): string {
+  return raw.trim().toLowerCase().replace(/^[\\/]+/, "");
+}
 
 /** Tolerant lookup: accepts "/help", "\help", "help", and stray whitespace or case. */
 export function findCommand(raw: string): Command | undefined {
-  const name = raw.trim().toLowerCase().replace(/^[\\/]+/, "");
+  const name = normalize(raw);
   return COMMANDS.find((command) => command.name === name);
+}
+
+/** Everything /help, the chips and tab completion are allowed to reveal. */
+export const LISTED = COMMANDS.filter((command) => !command.hidden);
+
+/**
+ * Whether a command does something today.
+ *
+ * Derived by asking the command rather than stored on it, because `reply` is
+ * evaluated at call time so LINKS can be edited without a rebuild. Paste a
+ * Discord URL into LINKS and /discord moves itself out of the scheduled group;
+ * a hardcoded flag would sit there lying about it.
+ */
+export function isLive(command: Command): boolean {
+  const reply = command.reply();
+  if (reply.kind === "lines") return !reply.pending;
+  if (reply.kind === "open") return reply.url !== null;
+  return true;
+}
+
+/** Names starting with what has been typed so far. Drives tab completion. */
+export function completions(raw: string): string[] {
+  const typed = normalize(raw);
+  if (!typed) return [];
+  return LISTED.filter((command) => command.name.startsWith(typed)).map(
+    (command) => command.name,
+  );
+}
+
+/**
+ * What the visitor probably meant. Prefix matches first — the common case is a
+ * half-typed name — then a small edit-distance pass so transpositions like
+ * "boadr" still land on /board.
+ */
+export function suggest(raw: string): string[] {
+  const typed = normalize(raw);
+  if (!typed) return [];
+  const prefix = completions(typed);
+  if (prefix.length > 0) return prefix;
+  return LISTED.filter((command) => distance(command.name, typed) <= 2).map(
+    (command) => command.name,
+  );
+}
+
+/** Levenshtein, one row at a time. Command names are short; this is never hot. */
+function distance(a: string, b: string): number {
+  let previous = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    const row = [i];
+    for (let j = 1; j <= b.length; j++) {
+      row[j] = Math.min(
+        previous[j] + 1,
+        row[j - 1] + 1,
+        previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+    }
+    previous = row;
+  }
+  return previous[b.length];
 }

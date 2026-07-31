@@ -1,3 +1,4 @@
+import { DEPARTURES } from "./departures";
 import HeroPrompt from "./hero-prompt";
 import Terminal from "./terminal";
 
@@ -164,42 +165,25 @@ export default function HomePage() {
                   <th scope="col">REMARKS</th>
                 </tr>
               </thead>
+              {/* Rows live in ./departures because the terminal's /board
+                  command prints the same board. One source, so the console and
+                  the page can never contradict each other. */}
               <tbody>
-                <tr>
-                  <td>NOW</td>
-                  <td>FIRST DEPARTURE</td>
-                  <td>BBP 001</td>
-                  <td>01</td>
-                  <td className="status-boarding">BOARDING</td>
-                </tr>
-                <tr>
-                  <td>OPEN</td>
-                  <td>THE TERMINAL</td>
-                  <td>CMD 001</td>
-                  <td>&gt;</td>
-                  <td className="status-open">TYPE /HELP</td>
-                </tr>
-                <tr>
-                  <td>TODAY</td>
-                  <td>DEPARTURE CODE</td>
-                  <td>???</td>
-                  <td>—</td>
-                  <td>DECODE</td>
-                </tr>
-                <tr>
-                  <td>NEXT</td>
-                  <td>UNFINISHED TERRITORY</td>
-                  <td>BBP 002</td>
-                  <td>—</td>
-                  <td>MILES NEEDED</td>
-                </tr>
-                <tr>
-                  <td>NEVER</td>
-                  <td>WAITING FOR PERFECT</td>
-                  <td>—</td>
-                  <td>—</td>
-                  <td className="status-cancelled">CANCELLED</td>
-                </tr>
+                {DEPARTURES.map((departure) => (
+                  <tr key={departure.destination}>
+                    <td>{departure.time}</td>
+                    <td>{departure.destination}</td>
+                    <td>{departure.flight}</td>
+                    <td>{departure.gate}</td>
+                    <td
+                      className={
+                        departure.status ? `status-${departure.status}` : undefined
+                      }
+                    >
+                      {departure.remarks}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>

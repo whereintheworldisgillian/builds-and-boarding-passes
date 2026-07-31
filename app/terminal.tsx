@@ -8,7 +8,17 @@ import {
   useRef,
   useState,
 } from "react";
-import { COMMANDS, findCommand, RUN_EVENT, type Reply } from "./commands";
+import {
+  completions,
+  findCommand,
+  isLive,
+  LISTED,
+  RUN_EVENT,
+  suggest,
+  type Command,
+  type Reply,
+} from "./commands";
+import { DEPARTURES } from "./departures";
 
 /* --------------------------------------------------------------------------
    The floating terminal launcher and its console panel.
@@ -29,14 +39,31 @@ type EntryBody =
   /** The command the visitor typed, echoed back. */
   | { kind: "echo"; text: string }
   | { kind: "lines"; lines: string[]; tone: "normal" | "pending" | "error" }
-  | { kind: "help" };
+  | { kind: "help" }
+  | { kind: "board" };
 
 type Entry = EntryBody & { id: number };
 
 /** Enough scrollback to feel real, bounded so the DOM cannot grow forever. */
 const MAX_ENTRIES = 60;
 
-const SUGGESTED = COMMANDS.filter((command) => command.suggested);
+const SUGGESTED = LISTED.filter((command) => command.suggested);
+
+/**
+ * /help, split by whether a command does anything yet. Computed per render
+ * rather than at module load: isLive() asks each command at call time, so a URL
+ * pasted into LINKS moves that command between groups without a rebuild.
+ */
+function helpGroups(): { label: string; pending: boolean; commands: Command[] }[] {
+  return [
+    { label: "Working now", pending: false, commands: LISTED.filter(isLive) },
+    {
+      label: "Scheduled",
+      pending: true,
+      commands: LISTED.filter((command) => !isLive(command)),
+    },
+  ].filter((group) => group.commands.length > 0);
+}
 
 export default function Terminal() {
   const [open, setOpen] = useState(false);
@@ -96,10 +123,19 @@ export default function Terminal() {
       setDraft("");
 
       if (!command) {
+        // Name the near miss when there is one. "Not a command" is true but
+        // useless to someone who typed /boadr and cannot see their own typo.
+        const guesses = suggest(raw).slice(0, 3);
         push({
           kind: "lines",
           tone: "error",
-          lines: [`${raw} is not a command. Type /help to see what is.`],
+          lines:
+            guesses.length > 0
+              ? [
+                  `${raw} is not a command.`,
+                  `Did you mean ${guesses.map((name) => `/${name}`).join(", ")}?`,
+                ]
+              : [`${raw} is not a command. Type /help to see what is.`],
         });
         return;
       }
@@ -146,6 +182,29 @@ export default function Terminal() {
           close();
           // No `behavior` on purpose — that defers to the stylesheet's
           // scroll-behavior, which already flattens under prefers-reduced-motion.
+          target.scrollIntoView({ block: "start" });
+          break;
+        }
+
+        case "board": {
+          const target = document.querySelector(reply.selector);
+          if (!target) {
+            push({
+              kind: "lines",
+              tone: "error",
+              lines: [`Cannot find ${reply.selector} on this page.`],
+            });
+            break;
+          }
+          push({ kind: "board" }, { kind: "lines", tone: "normal", lines: reply.lines });
+          // Unlike /scroll, this one printed something first. Closing the panel
+          // on a desktop would throw away the board it just rendered, so the
+          // panel stays and the page moves behind it. On a phone the panel
+          // covers the destination, so there it still closes — same query the
+          // stylesheet uses to decide this is a pointer device.
+          if (!window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+            close();
+          }
           target.scrollIntoView({ block: "start" });
           break;
         }
@@ -209,7 +268,42 @@ export default function Terminal() {
     return () => document.removeEventListener("keydown", onKeyDown);
   }, [open, close]);
 
+  // Reach the console from anywhere on the page. A modifier combo rather than a
+  // bare "/" on purpose: WCAG 2.1.4 covers single-character shortcuts, which
+  // have to be remappable or focus-scoped, and this one has no reason to be
+  // either. Cmd/Ctrl+K is also what this audience already presses.
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "k" && event.key !== "K") return;
+      if (!event.metaKey && !event.ctrlKey) return;
+      event.preventDefault();
+      if (open) close();
+      else setOpen(true);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [open, close]);
+
   const onInputKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Tab") {
+      // Only ever swallow Tab when it has something to complete. On an empty or
+      // unmatched field it must still move focus, or the input becomes a trap
+      // with no keyboard way out.
+      const matches = draft.trim() ? completions(draft) : [];
+      if (matches.length === 0) return;
+      event.preventDefault();
+      if (matches.length === 1) {
+        setDraft(`/${matches[0]}`);
+        return;
+      }
+      push({
+        kind: "lines",
+        tone: "normal",
+        lines: [matches.map((name) => `/${name}`).join("  ")],
+      });
+      return;
+    }
+
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
     if (history.length === 0) return;
     event.preventDefault();
@@ -312,22 +406,51 @@ export default function Terminal() {
 
               if (entry.kind === "help") {
                 return (
-                  <dl className="terminal-help" key={entry.id}>
-                    {COMMANDS.map((command) => (
-                      <div key={command.name}>
-                        <dt>
-                          <button
-                            type="button"
-                            className="terminal-chip"
-                            onClick={() => run(command.name)}
-                          >
-                            /{command.name}
-                          </button>
-                        </dt>
-                        <dd>{command.summary}</dd>
+                  <div className="terminal-help-block" key={entry.id}>
+                    {helpGroups().map((group) => (
+                      <section
+                        key={group.label}
+                        data-tone={group.pending ? "pending" : undefined}
+                      >
+                        <h3 className="terminal-help-heading">{group.label}</h3>
+                        <dl className="terminal-help">
+                          {group.commands.map((command) => (
+                            <div key={command.name}>
+                              <dt>
+                                <button
+                                  type="button"
+                                  className="terminal-chip"
+                                  onClick={() => run(command.name)}
+                                >
+                                  /{command.name}
+                                </button>
+                              </dt>
+                              <dd>{command.summary}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                      </section>
+                    ))}
+                    <p className="terminal-help-keys">
+                      Tab completes · ↑ ↓ history · Esc closes · ⌘K opens
+                    </p>
+                  </div>
+                );
+              }
+
+              if (entry.kind === "board") {
+                return (
+                  <div className="terminal-board" key={entry.id}>
+                    {DEPARTURES.map((departure) => (
+                      <div key={departure.destination}>
+                        <span>{departure.time}</span>
+                        <b>{departure.destination}</b>
+                        <span data-status={departure.status}>
+                          {departure.remarks}
+                        </span>
                       </div>
                     ))}
-                  </dl>
+                  </div>
                 );
               }
 

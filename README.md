@@ -53,6 +53,7 @@ app/
   terminal.tsx   floating terminal button + console panel (client component)
   hero-prompt.tsx the prompt in the hero — sends commands to the terminal
   commands.ts    the terminal's command set — THE FILE TO EDIT for commands
+  departures.ts  the departure board's rows — read by page.tsx AND /board
   globals.css    THE ENTIRE VISUAL SYSTEM — ~2200 lines of plain CSS
 public/
   fonts/         Geist Sans + Geist Mono, self-hosted woff2
@@ -69,7 +70,8 @@ handed over.
 
 | What | Where |
 | --- | --- |
-| Any words, any section, the departure rows | `app/page.tsx` |
+| Any words, any section | `app/page.tsx` |
+| The departure board's rows | `app/departures.ts` — changes the page *and* `/board` |
 | The terminal's commands, their text, and the links | `app/commands.ts` |
 | The terminal's welcome text or button label | `app/terminal.tsx` |
 | The hero prompt's placeholder or its chips | `app/hero-prompt.tsx` |
@@ -82,6 +84,14 @@ Adding or removing a hero slide is **not** just a file change: the slide count
 is baked into the keyframe percentages in `globals.css`. See the `HERO
 SLIDESHOW` comment there, and [DESIGN.md](DESIGN.md) for why new photos must go
 through the crop/re-encode pipeline first (EXIF GPS).
+
+A command's place in `/help` is not something you set. `/help` splits into
+**Working now** and **Scheduled** by asking each command what it replies with —
+a `pending` reply or a `null` link puts it under Scheduled. So a command cannot
+be advertised as working without actually working, and filling in a URL in
+`LINKS` promotes it on its own. Add `hidden: true` to keep a command out of
+`/help`, the chips and tab completion but still runnable — that is how `/vibe`
+stays findable rather than listed.
 
 Reordering the slides is also not free. The rotation is a loop, and the order
 holds two rules at once: tone alternates between consecutive slides, and the two
