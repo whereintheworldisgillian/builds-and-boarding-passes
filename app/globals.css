@@ -453,7 +453,18 @@ img {
 
 .boarding-pass {
   position: absolute;
-  right: 4vw;
+  /* The floating launcher owns the true bottom-right corner — it is the
+     interactive thing, and it is fixed to the viewport. This card is absolute
+     inside .hero, so it CANNOT be cleared vertically: the hero is 0–163px
+     taller than the viewport depending on size, pass-float translates the card,
+     and rotate(2.5deg) grows its box again. Three moving parts, none of them
+     knowable from the launcher's side.
+
+     Sideways is stable. The launcher sits 1.15rem from the right and is 3.5rem
+     wide, so anything past 4.65rem plus this card's ~12px of rotation growth is
+     clear of it. max() keeps the original 4vw gutter on very wide screens where
+     4vw is already bigger. */
+  right: max(4vw, 6.5rem);
   bottom: 2.6rem;
   width: min(23vw, 360px);
   min-width: 320px;
@@ -2532,34 +2543,10 @@ footer p:last-child {
   }
 }
 
-/* Above this width .boarding-pass exists and owns the bottom-right corner, so
-   both launcher and panel step to its left. Without this the round launcher
-   overlaps the pass's bottom-right corner by about 23x33px at 1280.
-
-   The offsets are expressed in the pass's own terms, so they track it if it
-   moves: 4vw of page gutter, then its width — clamp() rather than
-   min(23vw, 360px) because the pass also carries min-width: 320px, which wins
-   below ~1565px — then 2.1rem to cover its rotate(2.5deg) plus a real gap. */
-@media (min-width: 1101px) {
-  .terminal-launch,
-  .terminal-panel {
-    right: calc(4vw + clamp(320px, 23vw, 360px) + 2.1rem);
-  }
-
-  .terminal-launch {
-    /* Clear of the scroll cue, which is also bottom-anchored and reaches to
-       within a couple of pixels of the launcher at 1101px. */
-    bottom: 6.2rem;
-  }
-
-  .terminal-panel {
-    /* Must clear the launcher: its own 6.2rem offset, plus its 3.5rem height,
-       plus a gap. The old value of 9.2rem was tuned for the 2.75rem text chip
-       and leaves the panel sitting 18px on top of the round one. The log's
-       max-height follows this automatically. */
-    --terminal-bottom: calc(6.2rem + 3.5rem + 1.4rem);
-  }
-}
+/* The launcher keeps the true bottom-right corner at every width — that is the
+   point of it, and it is where the eye goes looking for a console. An earlier
+   pass stepped it to the left of .boarding-pass to resolve their overlap; the
+   pass yields instead. See the `bottom` on .boarding-pass. */
 
 @media (prefers-reduced-motion: reduce) {
   /* No lift and no blink. The panel still needs to appear, but the blanket rule
@@ -2784,19 +2771,32 @@ footer p:last-child {
     transform: translateY(-6vh);
   }
 
-  /* The pass sits 4vw from the right and is clamp(320px, 23vw, 360px) wide, so
-     the free half-width from the centre line is 46vw - passWidth. Doubled, less
-     a gap, is the widest the prompt can be without touching it.
+  /* The whole block is capped, not just the field: the chips are centred too,
+     and constraining only the input let them run 15px into the pass at 1101px.
+     Capping the wrapper makes the chips wrap instead.
+
+     The pass sits max(4vw, 6.5rem) from the right and is
+     clamp(320px, 23vw, 360px) wide, so the free half-width from the centre line
+     is 50vw minus both. Doubled, less a gap, is the widest this can be without
+     touching it. Keep in step with .boarding-pass — derived from that rule, not
+     guessed.
 
      The 2.6rem is not just breathing room: the pass carries rotate(2.5deg),
      which pushes its real left edge about 12px past its CSS box. 1.5rem here
      still left a 2px overlap. */
-  .hero-prompt {
-    width: min(36rem, calc(2 * (46vw - clamp(320px, 23vw, 360px)) - 2.6rem));
+  .hero-prompt-block {
+    width: min(
+      36rem,
+      calc(
+        2 * (50vw - max(4vw, 6.5rem) - clamp(320px, 23vw, 360px)) - 2.6rem
+      )
+    );
+    margin-top: 1.6rem;
+    margin-inline: auto;
   }
 
-  .hero-prompt-block {
-    margin-top: 1.6rem;
+  .hero-prompt {
+    width: 100%;
   }
 
   .hero-prompt-chips {

@@ -192,14 +192,17 @@ Three things that are load-bearing:
 - **No `backdrop-filter`.** It sits over six continuously animating photo
   layers, so a blur would be recomputed every frame forever. See the motion
   rules above.
-- **The prompt narrows on short desktop viewports rather than moving.** Adding
+- **The block narrows on short desktop viewports rather than moving.** Adding
   it made `.hero-copy` about 100px taller, and the old lift values then put the
   headline *behind* the fixed nav at 1280×720 while the prompt ran 116px into
   the boarding pass at 1101×700. No lift fixes both — the copy is simply taller
-  than the band between nav and pass. So the copy sits closer to centre and the
-  prompt's width is derived from the pass's own geometry. The `2.6rem` in that
-  `calc()` is not padding: the pass's `rotate(2.5deg)` pushes its real left edge
-  about 12px past its CSS box, and 1.5rem still left a 2px overlap.
+  than the band between nav and pass. So the copy sits closer to centre and
+  `.hero-prompt-block` takes a width derived from the pass's own position.
+
+  Cap the **block**, not the field: the chips are centred too, and constraining
+  only the input let them run 15px into the pass at 1101px. The `2.6rem` in that
+  `calc()` is not padding either — the pass's `rotate(2.5deg)` pushes its real
+  left edge about 12px past its CSS box, and 1.5rem still left a 2px overlap.
 - **It hides while the console is open.** The panel opens on top of it and cuts
   it in half. `visibility: hidden` rather than opacity, so the hidden field also
   leaves the tab order.
@@ -252,13 +255,24 @@ Two details that are load-bearing and easy to undo by accident:
 - **The notched corner lives on an inner `<span>`, not the button.** It is the
   nav chip's `clip-path`, and `clip-path` on a focusable element crops its own
   focus ring. The button stays unclipped so the orange ring can sit outside it.
-- **The position is derived from the boarding pass, not chosen.** The obvious
-  bottom-right corner is already `.boarding-pass` (measured 331×274 at 1280×720,
-  leaving 46px to its right). Above 1101px the launcher tucks in to the pass's
-  left using the pass's own geometry — `clamp(320px, 23vw, 360px)`, because the
-  pass's `min-width` wins below ~1565px and `rotate(2.5deg)` grows its box by
-  about 12px. Below 1101px the pass is not rendered and the launcher takes the
-  real corner. Verified collision-free from 1101px to 1920px, and at 320/390px.
+- **The launcher owns the true bottom-right corner, at every width.** It is
+  `position: fixed` at `1.15rem` from both edges and it does not move — that is
+  where people look for a console. `.boarding-pass` used to sit there, and an
+  earlier attempt stepped the launcher to the pass's left instead; that was
+  wrong, because it moved the interactive element to accommodate decoration.
+
+  **The pass yields, and it yields sideways.** It cannot be cleared vertically:
+  it is `position: absolute` inside `.hero`, which runs 0–163px taller than the
+  viewport depending on size, `pass-float` translates it continuously, and
+  `rotate(2.5deg)` grows its box again. Three moving parts, none of them visible
+  from a viewport-fixed launcher. Horizontal separation has none of that, so the
+  pass sits at `right: max(4vw, 6.5rem)` — past the launcher's 4.65rem of width
+  plus its own ~12px of rotation growth, keeping the original 4vw gutter on very
+  wide screens where 4vw is already larger.
+
+  **`.hero-prompt-block` derives its width from that same rule.** Change one and
+  the other has to follow. Verified collision-free — launcher, panel, prompt and
+  chips — at ten sizes from 1101×700 to 1920×1080, and at 390px.
 
 The caret blinks only on hover, focus, or while open. A cursor blinking forever
 in the corner would repaint for the life of the page for no reason.
