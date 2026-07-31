@@ -119,13 +119,52 @@ compositing at any moment and the rest sit idle at `opacity: 0`. Adding a
 seventh photo is not free — weigh it against the fact that this page is usually
 open next to a video encoder.
 
+## What the hero slides are
+
+Not all six are photographs, and that is the point. The community's feedback on
+the first version was that the page read as a travel site, because six
+destination photographs are the visual grammar of a tourism board. The rotation
+now says what the project is directly:
+
+| | | |
+| --- | --- | --- |
+| 01 | `01-commit-diff.jpg` | a real commit from this repo, rendered |
+| 02 | `02-attabad-lake.jpg` | Gillian's |
+| 03 | `03-jet-bridge-night.jpg` | stock |
+| 04 | `04-zhangjiajie-pillars.jpg` | Gillian's |
+| 05 | `05-open-source.jpg` | a real file from this repo, rendered |
+| 06 | `06-sunset-rays.jpg` | Gillian's |
+
+**02, 04 and 06 are Gillian's own travel photographs** and should not be
+replaced with stock.
+
+The order carries two constraints at once, and it is a **loop** — 06 wraps back
+to 01:
+
+1. **Tone alternates.** No two consecutive slides sit at the same brightness.
+2. **The two text slides sit at 01 and 05**, never adjacent in either direction.
+
+Reordering by renaming the files is fine, but both constraints have to survive.
+
+### The text slides
+
+They are images, not markup — the slideshow is six `<img>` on one CSS loop and
+adding a seventh kind of layer would cost more than it is worth. Two things
+about making them:
+
+- **Their contrast is baked into the image, not the CSS.** One `.hero-wash`
+  serves all six slides, and there is no JavaScript driving the rotation, so a
+  per-slide wash is not available. Type-heavy slides are therefore rendered at
+  low alpha (~0.45 on near-black) so the shared wash is enough.
+- **Keep the content in a narrow centred column.** `object-fit: cover` crops a
+  2000×1125 slide to roughly its middle 500px on a phone. An earlier draft set
+  in full-bleed lost the first characters of every line at 1280 and most of the
+  slide on mobile. ~1180px of content centred in 2000px survives both.
+
 ## Photographs
 
-`public/hero/01-flight-window.jpg` is stock. **`02`–`06` are Gillian's own
-travel photographs** and should not be replaced with stock.
-
-All six are pre-cropped to 16:9 at 2000×1125 and encoded at JPEG q76 mozjpeg —
-1.6 MB for the set. Pre-cropping rather than leaving it to `object-fit` means
+All slides are pre-cropped to 16:9 at 2000×1125 and encoded at JPEG q76 mozjpeg
+— 1.3 MB for the set. Pre-cropping rather than leaving it to `object-fit` means
 the framing is chosen deliberately (four of the originals are portrait) and no
 bytes are spent on pixels that get cropped away.
 
@@ -134,6 +173,36 @@ the exact coordinates of where it was taken. Anything in `public/` is publicly
 downloadable, so originals live in `photo-originals/`, which is gitignored and
 never served. Run any new photo through the same pipeline rather than dropping
 a camera file straight into `public/hero/`.
+
+## The hero prompt
+
+`app/hero-prompt.tsx` replaced the "Enter the journey" button. A field a visitor
+can type into is the object this audience recognises on sight, and it is the one
+thing in the hero a travel site would never have. "See where we landed" stays
+underneath as the path for anyone who would rather click than type.
+
+It does not own any commands. Submitting dispatches `RUN_EVENT` on `window`;
+`terminal.tsx` listens, opens itself and runs it, so **a command has exactly one
+implementation**. A custom event rather than context or shared state: the two
+components sit in different parts of the tree with a server-rendered page
+between them.
+
+Three things that are load-bearing:
+
+- **No `backdrop-filter`.** It sits over six continuously animating photo
+  layers, so a blur would be recomputed every frame forever. See the motion
+  rules above.
+- **The prompt narrows on short desktop viewports rather than moving.** Adding
+  it made `.hero-copy` about 100px taller, and the old lift values then put the
+  headline *behind* the fixed nav at 1280×720 while the prompt ran 116px into
+  the boarding pass at 1101×700. No lift fixes both — the copy is simply taller
+  than the band between nav and pass. So the copy sits closer to centre and the
+  prompt's width is derived from the pass's own geometry. The `2.6rem` in that
+  `calc()` is not padding: the pass's `rotate(2.5deg)` pushes its real left edge
+  about 12px past its CSS box, and 1.5rem still left a 2px overlap.
+- **It hides while the console is open.** The panel opens on top of it and cuts
+  it in half. `visibility: hidden` rather than opacity, so the hidden field also
+  leaves the tab order.
 
 ## The terminal
 

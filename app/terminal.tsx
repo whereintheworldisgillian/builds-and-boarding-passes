@@ -8,7 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { COMMANDS, findCommand, type Reply } from "./commands";
+import { COMMANDS, findCommand, RUN_EVENT, type Reply } from "./commands";
 
 /* --------------------------------------------------------------------------
    The floating terminal launcher and its console panel.
@@ -173,6 +173,32 @@ export default function Terminal() {
     const newest = echoes[echoes.length - 1];
     log.scrollTop = newest ? newest.offsetTop : log.scrollHeight;
   }, [entries, open]);
+
+  // Let the page know the console is up. The only listener is the hero prompt,
+  // which the panel would otherwise sit on top of and cut in half — and which is
+  // redundant while the real thing is open. An attribute rather than more
+  // plumbing: the hero prompt is a sibling three levels away in server-rendered
+  // markup, and this is styling, not state it needs to read.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.toggleAttribute("data-terminal-open", open);
+    return () => root.removeAttribute("data-terminal-open");
+  }, [open]);
+
+  // The hero prompt sends its commands here rather than running them itself, so
+  // there is exactly one implementation of what a command does. Opening first
+  // means the transcript is on screen before the reply lands — including the
+  // replies that close it again, like /board.
+  useEffect(() => {
+    const onRun = (event: Event) => {
+      const text = (event as CustomEvent<string>).detail;
+      if (typeof text !== "string") return;
+      setOpen(true);
+      run(text);
+    };
+    window.addEventListener(RUN_EVENT, onRun);
+    return () => window.removeEventListener(RUN_EVENT, onRun);
+  }, [run]);
 
   useEffect(() => {
     if (!open) return;

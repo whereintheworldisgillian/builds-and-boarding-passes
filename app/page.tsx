@@ -1,3 +1,4 @@
+import HeroPrompt from "./hero-prompt";
 import Terminal from "./terminal";
 
 export default function HomePage() {
@@ -23,43 +24,59 @@ export default function HomePage() {
       </header>
 
       <section className="hero" aria-labelledby="hero-title">
-        {/* Six stacked photos on one shared CSS loop — crossfading, each with a
-            slow zoom, no JavaScript. Slot 01 is the flight window; 02–06 are
-            Gillian's own travel photographs.
+        {/* Six stacked slides on one shared CSS loop — crossfading, each with a
+            slow zoom, no JavaScript.
 
-            Ordered to alternate tone rather than geography, so no two
-            consecutive slides sit at the same brightness: dark window, bright
-            lake, near-black pavilion, sunlit pillars, black cityscape, vivid
-            sunset. Reorder by renaming the files.
+            Two of the six are not photographs. 01 is a real commit from this
+            repo and 05 is a real file from it, rendered to an image. The site
+            is for people who build, so the rotation says so directly rather
+            than leaving photographs to imply it. 02, 04 and 06 are Gillian's
+            own travel photographs; 03 is stock.
+
+            The order carries two constraints at once, and it is a LOOP, so 06
+            wraps back to 01:
+
+            - Tone alternates, so no two consecutive slides sit at the same
+              brightness: dark diff, bright lake, dark tarmac, sunlit pillars,
+              dark source, vivid sunset.
+            - The two text slides sit at 01 and 05, never adjacent in either
+              direction.
+
+            Reorder by renaming the files, but keep both constraints.
 
             THE COUNT IS BAKED INTO THE CSS. Keyframe percentages cannot use
             calc(), so adding or removing a slide means retuning the keyframes
             and the nth-child delays in globals.css. The formula is in the
             comment above them. */}
         <div className="hero-media" aria-hidden="true">
-          <img src="/hero/01-flight-window.jpg" alt="" fetchPriority="high" decoding="async" />
+          <img src="/hero/01-commit-diff.jpg" alt="" fetchPriority="high" decoding="async" />
           <img src="/hero/02-attabad-lake.jpg" alt="" decoding="async" />
-          <img src="/hero/03-night-pavilion.jpg" alt="" decoding="async" />
+          <img src="/hero/03-jet-bridge-night.jpg" alt="" decoding="async" />
           <img src="/hero/04-zhangjiajie-pillars.jpg" alt="" decoding="async" />
-          <img src="/hero/05-bangkok-night.jpg" alt="" decoding="async" />
+          <img src="/hero/05-open-source.jpg" alt="" decoding="async" />
           <img src="/hero/06-sunset-rays.jpg" alt="" decoding="async" />
         </div>
         <div className="hero-wash" aria-hidden="true" />
         <div className="hero-grid" aria-hidden="true" />
 
         <div className="hero-copy">
+          {/* "Shipped" rather than "built": it is the one word that belongs to
+              both halves of this project at once — deploying software and
+              sending something across a border. */}
           <h1 id="hero-title">
-            <span>Ideas get built.</span>
+            <span>Ideas get shipped.</span>
             <em>Borders get crossed.</em>
           </h1>
           <p>
-            A moving studio, an open notebook, and a world tour for people who
-            stopped waiting for perfect.
+            A moving studio and an open repo. Vibe coding a new build in every
+            city, for people who stopped waiting for perfect.
           </p>
+          {/* Replaces the "Enter the journey" button. A field you can type into
+              is the object this audience recognises on sight; a button is not.
+              "See where we landed" stays as the path for anyone who would
+              rather click than type. */}
+          <HeroPrompt />
           <div className="hero-actions">
-            <a className="button button-light" href="#manifest">
-              Enter the journey <span aria-hidden="true">↘</span>
-            </a>
             <a className="text-link" href="#now">
               See where we landed <span aria-hidden="true">↗</span>
             </a>
@@ -79,35 +96,38 @@ export default function HomePage() {
             <span>Builds &amp; Boarding Passes</span>
             <span>BBP / 001</span>
           </div>
+          {/* A ticket shape carrying build data, not airline data. The route is
+              the thesis of the whole project in two words; the fields below are
+              all true today, which is why none of them is a date. */}
           <div className="pass-route">
             <div>
-              <strong>WRLD</strong>
-              <span>Anywhere</span>
+              <strong>IDEA</strong>
+              <span>Rough, unfinished</span>
             </div>
             <div className="pass-flight" aria-hidden="true">
               <span>✈</span>
             </div>
             <div>
-              <strong>YOU</strong>
-              <span>The next version of you</span>
+              <strong>SHIPPED</strong>
+              <span>Live, in public</span>
             </div>
           </div>
           <div className="pass-details">
             <div>
-              <span>Flight</span>
+              <span>Build</span>
               <strong>BBP 001</strong>
             </div>
             <div>
-              <span>Gate</span>
-              <strong>OPEN</strong>
+              <span>Stack</span>
+              <strong>NEXT · TS</strong>
             </div>
             <div>
-              <span>Seat</span>
-              <strong>ANY</strong>
+              <span>Model</span>
+              <strong>OPUS 5</strong>
             </div>
             <div>
-              <span>Boarding</span>
-              <strong>NOW</strong>
+              <span>Shipping</span>
+              <strong>IN PUBLIC</strong>
             </div>
           </div>
           <div className="pass-footer">

@@ -22,6 +22,14 @@ export const LINKS: Record<"livestream" | "discord", string | null> = {
   discord: null,
 };
 
+/**
+ * Fired on `window` when something outside the terminal wants a command run —
+ * the hero prompt is the only sender today. `detail` is the raw text, which
+ * findCommand() below is tolerant about. terminal.tsx listens, opens itself and
+ * runs it, so the terminal stays the single place a command is ever executed.
+ */
+export const RUN_EVENT = "bbp:run-command";
+
 /** What the terminal does in response to a command. */
 export type Reply =
   /** Render the full command table. */

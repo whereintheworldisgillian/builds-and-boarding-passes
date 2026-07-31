@@ -50,12 +50,14 @@ the Next.js framework preset; nothing else needs configuring.
 app/
   layout.tsx     html shell, metadata, skip link
   page.tsx       THE ENTIRE PAGE — all content and structure
-  terminal.tsx   floating terminal button + panel (the one client component)
+  terminal.tsx   floating terminal button + console panel (client component)
+  hero-prompt.tsx the prompt in the hero — sends commands to the terminal
   commands.ts    the terminal's command set — THE FILE TO EDIT for commands
   globals.css    THE ENTIRE VISUAL SYSTEM — ~2200 lines of plain CSS
 public/
   fonts/         Geist Sans + Geist Mono, self-hosted woff2
-  hero/          the six hero slideshow photographs, 01–06 in rotation order
+  hero/          the six hero slides, 01–06 in rotation order — two of them
+                 are this repo's own code, rendered to an image
   *.jpg          the two in-page photographs
 photo-originals/ full-resolution sources — gitignored, never served
 ```
@@ -70,6 +72,7 @@ handed over.
 | Any words, any section, the departure rows | `app/page.tsx` |
 | The terminal's commands, their text, and the links | `app/commands.ts` |
 | The terminal's welcome text or button label | `app/terminal.tsx` |
+| The hero prompt's placeholder or its chips | `app/hero-prompt.tsx` |
 | Where the terminal button sits | `.terminal-launch` in `app/globals.css` |
 | Any colour, spacing, type, motion | `app/globals.css` |
 | The photographs | `public/*.jpg` — keep the filenames |
@@ -79,6 +82,10 @@ Adding or removing a hero slide is **not** just a file change: the slide count
 is baked into the keyframe percentages in `globals.css`. See the `HERO
 SLIDESHOW` comment there, and [DESIGN.md](DESIGN.md) for why new photos must go
 through the crop/re-encode pipeline first (EXIF GPS).
+
+Reordering the slides is also not free. The rotation is a loop, and the order
+holds two rules at once: tone alternates between consecutive slides, and the two
+text slides (01 and 05) never sit next to each other in either direction.
 
 Colours are custom properties in the `:root` block at the top of the
 stylesheet: `--ink`, `--paper`, `--orange`, `--acid`. Change one there and the

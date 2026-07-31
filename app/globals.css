@@ -510,7 +510,11 @@ img {
 
 .pass-route strong {
   display: block;
-  font-size: 2.2rem;
+  /* Was 2.2rem, which fitted WRLD and YOU. The route now reads IDEA -> SHIPPED,
+     and seven characters overflow the card at its 320px min-width. CSS cannot
+     size to a character count, so this is set to the longest word actually
+     shipped: measure again before putting a longer one here. */
+  font-size: 1.85rem;
   letter-spacing: -0.08em;
   line-height: 1;
 }
@@ -2618,5 +2622,190 @@ footer p:last-child {
 
   .hero-copy > p {
     width: min(100%, 570px);
+  }
+}
+
+/* --------------------------------------------------------------------------
+   THE HERO PROMPT
+
+   Where the "Enter the journey" button was. A field a visitor can type into is
+   the object this audience recognises on sight, and it is the one thing on the
+   page a travel site would never have.
+
+   It borrows the terminal's language — mono, acid caret, board-sized labels —
+   but not its chrome. It is not a small terminal floating in the hero; it is
+   the front door to the one in the corner. See app/hero-prompt.tsx.
+
+   NO backdrop-filter here. It sits over six photo layers that animate
+   continuously, so a blur would be recomputed every frame for the life of the
+   page. Flat opacity does the job. See "Motion performance rules" in DESIGN.md.
+   -------------------------------------------------------------------------- */
+
+.hero-prompt-block {
+  margin-top: 2.5rem;
+  animation: rise-in 0.9s 0.62s both;
+}
+
+/* The console panel opens over the hero and cuts this in half. visibility
+   rather than opacity so the hidden field also leaves the tab order — a
+   focusable control nobody can see is worse than a missing one. Focus has
+   already moved into the panel by this point, and the space is kept, so
+   nothing reflows. terminal.tsx sets the attribute. */
+[data-terminal-open] .hero-prompt-block {
+  visibility: hidden;
+}
+
+.hero-prompt {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  width: min(100%, 36rem);
+  margin: 0 auto;
+  padding: 0.9rem 0.9rem 0.9rem 1.1rem;
+  text-align: left;
+  background: rgba(7, 13, 14, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 1.1rem 3rem rgba(7, 13, 14, 0.45);
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.hero-prompt:focus-within {
+  background: rgba(7, 13, 14, 0.82);
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+/* Visually hidden, not display:none — the input still needs a real label. */
+.hero-prompt-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.hero-prompt-caret {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--acid);
+}
+
+.hero-prompt-input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  color: white;
+  background: none;
+  border: 0;
+  font-family: var(--font-geist-mono), monospace;
+  /* 16px so iOS Safari does not zoom the page when this takes focus. Dropped to
+     the board's own size on devices that cannot pinch-zoom a focused field. */
+  font-size: 1rem;
+}
+
+.hero-prompt-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.hero-prompt-input:focus-visible {
+  outline: none;
+}
+
+.hero-prompt-run {
+  flex: none;
+  padding: 0.5rem 0.85rem;
+  color: var(--ink);
+  background: var(--paper-bright);
+  border: 0;
+  cursor: pointer;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.62rem;
+  font-weight: 750;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  transition: background-color 150ms ease;
+}
+
+.hero-prompt-run:hover {
+  background: white;
+}
+
+.hero-prompt-chips {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.95rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hero-prompt-chip {
+  padding: 0.36rem 0.62rem;
+  color: rgba(255, 255, 255, 0.8);
+  background: rgba(7, 13, 14, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  cursor: pointer;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  transition: color 150ms ease, border-color 150ms ease,
+    background-color 150ms ease;
+}
+
+.hero-prompt-chip:hover {
+  color: var(--acid);
+  background: rgba(7, 13, 14, 0.7);
+  border-color: rgba(217, 255, 111, 0.55);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hero-prompt-input {
+    font-size: 0.9rem;
+  }
+}
+
+/* Short desktop viewports, with the prompt in the hero.
+
+   The prompt block added roughly 100px to .hero-copy, and the lift rules above
+   were tuned when the copy ended at a single row of buttons. At 1280x720 the
+   old -11vh put the headline 12px BEHIND the fixed nav; at 1101x700 the prompt
+   ran 116px into the boarding pass. There is no lift that fixes both — the copy
+   is simply taller than the band between the nav and the pass.
+
+   So the copy drops back toward centre, and the prompt narrows to fit beside
+   the pass instead of under it. Must stay below the base .hero-prompt rule to
+   win on source order. */
+@media (min-width: 1101px) and (max-height: 960px) {
+  .hero-copy {
+    transform: translateY(-6vh);
+  }
+
+  /* The pass sits 4vw from the right and is clamp(320px, 23vw, 360px) wide, so
+     the free half-width from the centre line is 46vw - passWidth. Doubled, less
+     a gap, is the widest the prompt can be without touching it.
+
+     The 2.6rem is not just breathing room: the pass carries rotate(2.5deg),
+     which pushes its real left edge about 12px past its CSS box. 1.5rem here
+     still left a 2px overlap. */
+  .hero-prompt {
+    width: min(36rem, calc(2 * (46vw - clamp(320px, 23vw, 360px)) - 2.6rem));
+  }
+
+  .hero-prompt-block {
+    margin-top: 1.6rem;
+  }
+
+  .hero-prompt-chips {
+    margin-top: 0.7rem;
+  }
+}
+
+@media (min-width: 1101px) and (max-height: 700px) {
+  .hero-copy {
+    transform: translateY(-3vh);
   }
 }
