@@ -44,13 +44,18 @@ export default function HeroPrompt() {
         <span className="hero-prompt-caret" aria-hidden="true">
           &gt;
         </span>
+        {/* The placeholder is short on purpose. The block is capped so it
+            clears the boarding pass, and between 1101px and 1279px that left
+            the field 93–192px wide — "type /help to look around" needs 216px
+            and was clipping mid-word. The chips underneath are the real "look
+            around" affordance, so the field only has to name the way in. */}
         <input
           id="hero-prompt-input"
           className="hero-prompt-input"
           type="text"
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
-          placeholder="type /help to look around"
+          placeholder="type /help"
           autoComplete="off"
           autoCapitalize="off"
           spellCheck={false}

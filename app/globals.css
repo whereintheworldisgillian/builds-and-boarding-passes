@@ -2899,6 +2899,27 @@ footer p:last-child {
   }
 }
 
+/* The tight end of that band. Between 1101px and 1279px the pass leaves the
+   block only 211–390px, and the field inside it drops to 93px — the chrome
+   around the field (padding, two gaps, the RUN button) costs a flat ~118px,
+   which is most of the block at 1101px.
+
+   So the chrome shrinks where the block cannot. This buys the field back about
+   30px without touching the block's width, so the clearance from the pass that
+   the rule above derives is untouched. Above 1280px there is room and the
+   prompt keeps its full padding. */
+@media (min-width: 1101px) and (max-width: 1279px) and (max-height: 960px) {
+  .hero-prompt {
+    gap: 0.55rem;
+    padding: 0.75rem 0.7rem 0.75rem 0.8rem;
+  }
+
+  .hero-prompt-run {
+    padding: 0.45rem 0.55rem;
+    letter-spacing: 0.06em;
+  }
+}
+
 @media (min-width: 1101px) and (max-height: 700px) {
   .hero-copy {
     transform: translateY(-3vh);
