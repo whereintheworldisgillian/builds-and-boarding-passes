@@ -2528,6 +2528,35 @@ footer p:last-child {
   }
 }
 
+/* Above this width .boarding-pass exists and owns the bottom-right corner, so
+   both launcher and panel step to its left. Without this the round launcher
+   overlaps the pass's bottom-right corner by about 23x33px at 1280.
+
+   The offsets are expressed in the pass's own terms, so they track it if it
+   moves: 4vw of page gutter, then its width — clamp() rather than
+   min(23vw, 360px) because the pass also carries min-width: 320px, which wins
+   below ~1565px — then 2.1rem to cover its rotate(2.5deg) plus a real gap. */
+@media (min-width: 1101px) {
+  .terminal-launch,
+  .terminal-panel {
+    right: calc(4vw + clamp(320px, 23vw, 360px) + 2.1rem);
+  }
+
+  .terminal-launch {
+    /* Clear of the scroll cue, which is also bottom-anchored and reaches to
+       within a couple of pixels of the launcher at 1101px. */
+    bottom: 6.2rem;
+  }
+
+  .terminal-panel {
+    /* Must clear the launcher: its own 6.2rem offset, plus its 3.5rem height,
+       plus a gap. The old value of 9.2rem was tuned for the 2.75rem text chip
+       and leaves the panel sitting 18px on top of the round one. The log's
+       max-height follows this automatically. */
+    --terminal-bottom: calc(6.2rem + 3.5rem + 1.4rem);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* No lift and no blink. The panel still needs to appear, but the blanket rule
      further up collapses the duration to 0.01ms, which is the intent here. */
