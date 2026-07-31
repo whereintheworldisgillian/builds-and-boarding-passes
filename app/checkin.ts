@@ -81,8 +81,30 @@ export function toStamp(raw: string): string {
   return raw.trim().replace(/\s+/g, " ").toUpperCase().slice(0, STAMP_MAX);
 }
 
-/** Tolerant: "hkt 001", "HKT-001" and " hkt001 " are all the same code. */
+/**
+ * Punctuation and case go, then the characters people genuinely confuse are
+ * folded together: O becomes zero, I and l become one.
+ *
+ * This code gets read aloud on a livestream and typed by someone half-watching.
+ * "HKT001" is zero-zero-one, but "HKTOO1" is a completely reasonable thing to
+ * hear and type, and there is no version of this where rejecting it is correct
+ * — the person is in the audience, which is the only thing the code is proving.
+ * Airlines leave O/0/I/1 out of booking references for exactly this reason; the
+ * folding is what buys that back without changing the code.
+ *
+ * Applied to both sides, so it works whichever way round the ambiguity falls.
+ * The trade-off: O and 0 become the same character, so two codes differing only
+ * by one could not coexist. Fine while one is live at a time.
+ */
+function canonical(raw: string): string {
+  return raw
+    .replace(/[^a-z0-9]/gi, "")
+    .toUpperCase()
+    .replace(/O/g, "0")
+    .replace(/[IL]/g, "1");
+}
+
+/** Tolerant: "hkt 001", "HKT-001", " hkt001 " and "HKTOO1" are all the code. */
 export function isBoardingCode(raw: string): boolean {
-  const strip = (s: string) => s.replace(/[^a-z0-9]/gi, "").toUpperCase();
-  return strip(raw) === strip(BOARDING_CODE);
+  return canonical(raw) === canonical(BOARDING_CODE);
 }
