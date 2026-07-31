@@ -146,6 +146,12 @@ export default function Terminal() {
           push({ kind: "help" });
           break;
 
+        case "clear":
+          // Drops the echo pushed above it too, which is the point — /clear
+          // leaving "> /clear" behind is not a cleared terminal.
+          setEntries([]);
+          break;
+
         case "lines":
           push({
             kind: "lines",

@@ -40,6 +40,8 @@ export type Reply =
   | { kind: "scroll"; selector: string; lines: string[] }
   /** Print the departure board, then scroll to the real one. */
   | { kind: "board"; selector: string; lines: string[] }
+  /** Wipe the transcript. Prints nothing — the empty log is the confirmation. */
+  | { kind: "clear" }
   /** Open a URL in a new tab, or explain that there is not one yet. */
   | { kind: "open"; url: string | null; lines: string[]; pendingLines: string[] };
 
@@ -78,6 +80,15 @@ export const COMMANDS: Command[] = [
       selector: "#board",
       lines: ["Full board on the page."],
     }),
+  },
+  {
+    name: "clear",
+    summary: "Clears the terminal",
+    // Clears the screen, not the history — /clear in a real shell leaves the
+    // arrow keys alone, and losing what you just typed would be a worse
+    // surprise than a full log. The greeting renders whenever the transcript is
+    // empty, so wiping it lands back on the welcome state for free.
+    reply: () => ({ kind: "clear" }),
   },
   {
     name: "today",

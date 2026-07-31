@@ -217,8 +217,8 @@ The command set lives in **`app/commands.ts`**, which is the file to edit. Addin
 a command is one entry in `COMMANDS`; `terminal.tsx` renders whatever is there
 and needs no changes.
 
-Replies are typed as a small union — `help`, `lines`, `scroll`, `board`, `open` —
-and each renders in one of three tones:
+Replies are typed as a small union — `help`, `lines`, `scroll`, `board`, `clear`,
+`open` — and each renders in one of three tones:
 
 | Tone | Colour | Means |
 | --- | --- | --- |
