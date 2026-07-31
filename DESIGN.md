@@ -209,7 +209,8 @@ Three things that are load-bearing:
 
 ## The terminal
 
-`app/terminal.tsx` is the **first and only client component** in the app.
+`app/terminal.tsx` is one of **three client components**, with `hero-prompt.tsx`
+and `checkin-dialog.tsx`.
 `page.tsx` stays a server component; the interactive corner is isolated so the
 rest of the page still ships as static markup with nothing attached to it.
 
@@ -218,7 +219,7 @@ a command is one entry in `COMMANDS`; `terminal.tsx` renders whatever is there
 and needs no changes.
 
 Replies are typed as a small union — `help`, `lines`, `scroll`, `board`, `clear`,
-`open` — and each renders in one of three tones:
+`checkin`, `open` — and each renders in one of three tones:
 
 | Tone | Colour | Means |
 | --- | --- | --- |
@@ -274,6 +275,49 @@ first, and closing would throw it away, so the close is gated behind the same
 `.terminal-reply p` is `white-space: pre-wrap` so a reply can align itself into
 columns — `/toolkit` pads its labels and would otherwise collapse to single
 spaces. Still wraps at the panel edge, unlike plain `pre`.
+
+## The check-in
+
+`/checkin` issues the visitor a boarding pass for **their** build.
+
+The first version of this routed people to Phuket, which was wrong: Phuket is
+where the studio is, not where the viewer is, and a pass routed to it makes the
+trip the point. The hero pass had already settled the question — `IDEA → SHIPPED`
+is the viewer's journey. So the check-in asks where *their* build is, sends it to
+SHIPPED, and collects no geography and no personal data. Nothing in it needs
+editing when the studio moves.
+
+**`app/checkin.ts` is the file to edit between streams** — the boarding code and
+the miles are two lines. The code ships in the JS bundle, so it is a
+participation token rather than security: it gives people a reason to be
+watching, and that is all it has to do.
+
+**Nothing is persisted.** There is no account to attach a stamp to. The dialog
+says so on screen, in the same amber the terminal gives anything scheduled — a
+counter that silently reset would be exactly the thing this project's rule
+forbids. When the backend lands, only the two `useState`s change.
+
+Four things that are load-bearing:
+
+- **It is a native `<dialog>` opened with `showModal()`.** The focus trap,
+  Escape, the inert background, `::backdrop` and focus-return are the platform's,
+  not ours. Backdrop-click is the only addition — a click whose `target` is the
+  dialog came from the backdrop, which is why the dialog carries no padding of
+  its own.
+- **`.pass-issued` must keep `display: block`.** The hero's pass is
+  `display: none` under 1100px because there is nowhere to put it. Without that
+  override the issued pass inherits it and the whole flow ends on an invisible
+  ticket on every phone.
+- **The route and detail grids are re-columned for this pass.** The hero's are
+  sized to strings it knows — `IDEA`, `BBP 001` — and `1fr` means `min-width:
+  auto`, so with a visitor-supplied stamp they could not shrink and pushed 18px
+  out of the dialog. `minmax(0, …)` lets them give, and the route type is
+  `clamp()`ed because `.pass-route strong` is sized for seven characters.
+- **Shipped routes to `NEXT ONE`.** A pass reading SHIPPED → SHIPPED is a dead
+  end, and whoever just shipped is exactly who to point at the next thing.
+
+Miles are paid per boarding code, not per submission, so reissuing a pass to try
+a different phase cannot farm them.
 
 ### Keyboard
 

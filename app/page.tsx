@@ -1,3 +1,4 @@
+import CheckinDialog from "./checkin-dialog";
 import { DEPARTURES } from "./departures";
 import HeroPrompt from "./hero-prompt";
 import Terminal from "./terminal";
@@ -354,6 +355,11 @@ export default function HomePage() {
           footer it is the final stop for keyboard users rather than an
           interruption between sections. */}
       <Terminal />
+
+      {/* Closed until /checkin asks for it. A <dialog> renders nothing at all
+          until showModal(), so its position in the document does not matter to
+          the layout — but it sits last for the same reason the terminal does. */}
+      <CheckinDialog />
     </main>
   );
 }

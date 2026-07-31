@@ -2657,6 +2657,319 @@ footer p:last-child {
   }
 }
 
+/* ==========================================================================
+   CHECK-IN — the boarding dialog
+
+   A native <dialog>, so the focus trap, Escape, the inert background and
+   focus-return are the platform's job rather than ours. Everything here is
+   presentation. See app/checkin-dialog.tsx.
+   ========================================================================== */
+
+.checkin {
+  /* No padding of its own: the dialog box must be exactly its content, so a
+     click landing on the element itself can only have come from the backdrop.
+     checkin-dialog.tsx relies on that to close. */
+  padding: 0;
+  width: min(30rem, calc(100vw - 2rem));
+  max-height: calc(100dvh - 2rem);
+  color: var(--paper-bright);
+  background: rgba(16, 24, 26, 0.98);
+  border: 1px solid var(--white-line);
+  border-radius: 1rem;
+  box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.6);
+  /* The ticket's notches are punched at -0.6rem, so they sit inside this
+     element's padding. That is fine to look at but it counts as scrollable
+     overflow, which gave the panel a horizontal scrollbar at every width.
+     Clipping the axis hides nothing — the notches are inside the padding box. */
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  font-family: var(--font-geist-mono), monospace;
+}
+
+.checkin::backdrop {
+  background: rgba(7, 13, 14, 0.72);
+}
+
+.checkin-inner {
+  display: grid;
+  gap: 1.15rem;
+  padding: 1.25rem;
+}
+
+.checkin-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.checkin-eyebrow {
+  margin: 0 0 0.3rem;
+  color: var(--acid);
+  font-size: 0.54rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.checkin-head h2 {
+  margin: 0;
+  font-family: var(--font-geist-sans), sans-serif;
+  font-size: 1.5rem;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+/* Same trick as the terminal's close: the box stays small so the header stays
+   compact, and a pseudo-element grows the tappable area to 44px. */
+.checkin-close {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  color: var(--paper-bright);
+  background: none;
+  border: 1px solid var(--white-line);
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 1.1rem;
+  line-height: 1;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.checkin-close::after {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  transform: translate(-50%, -50%);
+  content: "";
+}
+
+.checkin-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* ---- The form --------------------------------------------------------- */
+
+.checkin-form {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.checkin-field {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.checkin-field label {
+  color: rgba(241, 238, 229, 0.62);
+  font-size: 0.54rem;
+  font-weight: 750;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.checkin-field select,
+.checkin-field input {
+  width: 100%;
+  padding: 0.7rem 0.75rem;
+  color: var(--paper-bright);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--white-line);
+  border-radius: 0.4rem;
+  font: inherit;
+  /* 16px, because iOS Safari zooms the page when a focused control is smaller.
+     This is a modal — being zoomed into it on open would be miserable. */
+  font-size: 1rem;
+}
+
+.checkin-field select {
+  /* The native control, deliberately. A custom listbox would mean rebuilding
+     keyboard support, typeahead and the mobile picker for no gain. */
+  appearance: none;
+  padding-right: 2.2rem;
+  background-image: linear-gradient(45deg, transparent 50%, var(--acid) 50%),
+    linear-gradient(135deg, var(--acid) 50%, transparent 50%);
+  background-position: calc(100% - 1.1rem) 55%, calc(100% - 0.75rem) 55%;
+  background-size: 0.35rem 0.35rem, 0.35rem 0.35rem;
+  background-repeat: no-repeat;
+  cursor: pointer;
+}
+
+/* The list itself is drawn by the OS, which does not inherit the dark panel. */
+.checkin-field option {
+  color: var(--paper-bright);
+  background: #10181a;
+}
+
+.checkin-field input::placeholder {
+  color: rgba(241, 238, 229, 0.4);
+}
+
+.checkin-field select:focus-visible,
+.checkin-field input:focus-visible {
+  outline: 2px solid var(--acid);
+  outline-offset: 1px;
+}
+
+.checkin-error {
+  margin: 0;
+  color: #ff8a63;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.checkin-board {
+  /* 44px floor. The type is small and board-styled, so padding alone left the
+     primary action of the whole flow at 40px. */
+  min-height: 2.75rem;
+  padding: 0.8rem 1rem;
+  color: var(--ink);
+  background: var(--acid);
+  border: 0;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  transition: background-color 150ms ease;
+}
+
+.checkin-board:hover {
+  background: white;
+}
+
+/* ---- Aboard ------------------------------------------------------------ */
+
+.checkin-aboard {
+  display: grid;
+  gap: 1rem;
+}
+
+/* The hero's ticket, reused whole. This only undoes what that copy carries for
+   its position in the corner — it is absolute, tilted and floating there, and
+   none of that belongs in a dialog. */
+.boarding-pass.pass-issued {
+  /* display is load-bearing: the hero's pass is hidden under 1100px because
+     there is nowhere to put it, and without this the issued pass inherits that
+     and the whole flow ends on an invisible ticket on every phone. This wins on
+     specificity and on source order — do not weaken the selector. */
+  display: block;
+  position: static;
+  width: 100%;
+  min-width: 0;
+  transform: none;
+  animation: none;
+}
+
+/* The notches are punched in the hero's dark background colour. Against the
+   panel they have to match the panel instead, or they read as stray dots. */
+.boarding-pass.pass-issued::before,
+.boarding-pass.pass-issued::after {
+  background: rgba(16, 24, 26, 0.98);
+}
+
+/* The hero route is a fixed IDEA -> SHIPPED, and .pass-route strong is sized to
+   exactly that (see the warning on that rule: "measure again before putting a
+   longer one here"). This route is whatever the visitor picked, up to
+   STAMP_MAX, so it has to be sized for the worst case instead of the known one.
+
+   `1fr` also means min-width:auto, so the columns could not shrink and pushed
+   18px out of the dialog on a phone — minmax(0,…) lets them give. */
+.pass-issued .pass-route {
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+}
+
+.pass-issued .pass-route strong {
+  font-size: clamp(0.95rem, 4.4vw, 1.5rem);
+  letter-spacing: -0.04em;
+  /* A 14-character stamp wraps to two lines rather than escaping the ticket. */
+  overflow-wrap: anywhere;
+}
+
+/* The hero's four detail cells hold short strings — BBP 001, OPUS 5 — so
+   repeat(4, 1fr) never has to shrink there. "The Terminal" is longer than a
+   quarter of a phone-width ticket, and 1fr means min-width:auto, so the grid
+   refused to shrink and pushed 17px out of the dialog instead. Two columns on a
+   phone, four once there is room, and minmax(0,…) so it can always give. */
+.pass-issued .pass-details {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 0.5rem;
+}
+
+@media (min-width: 480px) {
+  .pass-issued .pass-details {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.checkin-aboard-line {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.checkin-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.checkin-actions .checkin-board {
+  flex: 1;
+  min-width: 8rem;
+}
+
+.checkin-again {
+  flex: 1;
+  min-width: 8rem;
+  min-height: 2.75rem;
+  padding: 0.8rem 1rem;
+  color: var(--paper-bright);
+  background: none;
+  border: 1px solid var(--white-line);
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.68rem;
+  font-weight: 750;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  transition: background-color 150ms ease, border-color 150ms ease;
+}
+
+.checkin-again:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.45);
+}
+
+/* The departure board's amber, the same colour the terminal gives anything that
+   is scheduled rather than built. Nothing here is saved yet and the panel says
+   so in the colour the rest of the site already uses for that. */
+.checkin-note {
+  margin: 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--white-line);
+  color: #ebef48;
+  font-size: 0.7rem;
+  line-height: 1.55;
+}
+
+@media (min-width: 480px) {
+  .checkin-inner {
+    padding: 1.6rem;
+  }
+}
+
 /* Skip link. Invisible until focused, so it changes nothing visually. */
 .skip-link {
   position: fixed;

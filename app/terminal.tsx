@@ -18,14 +18,15 @@ import {
   type Command,
   type Reply,
 } from "./commands";
+import { OPEN_CHECKIN } from "./checkin";
 import { DEPARTURES } from "./departures";
 
 /* --------------------------------------------------------------------------
    The floating terminal launcher and its console panel.
 
-   This is the only client component in the app. page.tsx stays a server
-   component — the interactive corner is isolated here so the rest of the page
-   still ships as static markup with no JavaScript attached to it.
+   One of three client components — with hero-prompt.tsx and checkin-dialog.tsx.
+   page.tsx stays a server component, so the rest of the page still ships as
+   static markup with no JavaScript attached to it.
 
    The command set itself lives in ./commands.ts. Nothing about a command is
    encoded here beyond how each reply kind is rendered, so adding a command
@@ -150,6 +151,15 @@ export default function Terminal() {
           // Drops the echo pushed above it too, which is the point — /clear
           // leaving "> /clear" behind is not a cleared terminal.
           setEntries([]);
+          break;
+
+        case "checkin":
+          push({ kind: "lines", tone: "normal", lines: reply.lines });
+          // Always closes, unlike /board: what opens is a modal covering the
+          // page, and leaving the console under it is a mess at any width. The
+          // transcript is still here when they come back.
+          close();
+          window.dispatchEvent(new CustomEvent(OPEN_CHECKIN));
           break;
 
         case "lines":

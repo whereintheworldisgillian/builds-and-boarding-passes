@@ -42,6 +42,8 @@ export type Reply =
   | { kind: "board"; selector: string; lines: string[] }
   /** Wipe the transcript. Prints nothing — the empty log is the confirmation. */
   | { kind: "clear" }
+  /** Print lines, close the console, and open the check-in dialog over the page. */
+  | { kind: "checkin"; lines: string[] }
   /** Open a URL in a new tab, or explain that there is not one yet. */
   | { kind: "open"; url: string | null; lines: string[]; pendingLines: string[] };
 
@@ -185,14 +187,17 @@ export const COMMANDS: Command[] = [
   },
   {
     name: "checkin",
-    summary: "Eventually begins the livestream check-in flow",
+    summary: "Issues you a boarding pass for your own build",
+    // Not a starter chip, for the same reason /toolkit is not: a fifth chip
+    // wraps the pinned row at 390px, and --terminal-chrome budgets that row's
+    // height. The hero prompt reads the same SUGGESTED list, so it would wrap
+    // into the boarding pass there too.
+    // No longer pending, so isLive() moves it into /help's "Working now" on its
+    // own. What it is honest about now lives on the dialog itself: the pass is
+    // real, and nothing is saved yet. See app/checkin.ts.
     reply: () => ({
-      kind: "lines",
-      pending: true,
-      lines: [
-        "Check-in — coming in Phase 1.",
-        "It needs accounts and a live stream to check in to. Neither exists yet.",
-      ],
+      kind: "checkin",
+      lines: ["Opening check-in."],
     }),
   },
   {
