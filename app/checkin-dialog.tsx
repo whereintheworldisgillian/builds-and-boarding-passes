@@ -2,9 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import {
-  BOARDING_CODE,
   destinationFor,
-  isBoardingCode,
   ISSUED_AT,
   MILES_PER_CHECKIN,
   OPEN_CHECKIN,
@@ -38,19 +36,18 @@ export default function CheckinDialog() {
 
   const [phase, setPhase] = useState("");
   const [custom, setCustom] = useState("");
-  const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
 
   const [pass, setPass] = useState<Pass | null>(null);
   const [miles, setMiles] = useState(0);
-  // Which codes have already paid out this session. Miles are per code, not per
-  // submission, so redoing a pass to try another phase cannot farm them.
-  const [earned, setEarned] = useState<string[]>([]);
+  // Miles are paid once per session, not once per submission — otherwise
+  // "Change my pass" would be a button that prints money. The boarding code
+  // used to be what bounded this; without it, the session is.
+  const [earned, setEarned] = useState(false);
 
   const titleId = useId();
   const phaseId = useId();
   const customId = useId();
-  const codeId = useId();
   const errorId = useId();
 
   const close = () => dialogRef.current?.close();
@@ -81,25 +78,18 @@ export default function CheckinDialog() {
 
     const stamp = chosen.stamp ?? toStamp(custom);
     if (!stamp) {
-      setError("Say where your build is, in a word or two.");
+      // Kept short so it stays one line at 360px — the reserved slot below the
+      // field is sized to one line, and the label already says "in a word or
+      // two". See .checkin-error-slot.
+      setError("Say where your build is.");
       return;
     }
 
-    if (!isBoardingCode(code)) {
-      setError(
-        code.trim()
-          ? "That is not the boarding code. It is called out on the stream."
-          : "Enter the boarding code from the stream.",
-      );
-      return;
-    }
-
-    // Same code twice: reissue the pass so they can change their phase, but do
-    // not pay again.
-    const alreadyEarned = earned.includes(BOARDING_CODE);
-    const payout = alreadyEarned ? 0 : MILES_PER_CHECKIN;
-    if (!alreadyEarned) {
-      setEarned((current) => [...current, BOARDING_CODE]);
+    // Reissuing gives them the pass they meant, but only the first check-in of
+    // the session pays.
+    const payout = earned ? 0 : MILES_PER_CHECKIN;
+    if (!earned) {
+      setEarned(true);
       setMiles((current) => current + payout);
     }
 
@@ -109,7 +99,6 @@ export default function CheckinDialog() {
 
   const startOver = () => {
     setPass(null);
-    setCode("");
     setError(null);
     // Phase and custom text are kept on purpose — the usual reason to start
     // over is to try a different one, and retyping what you just chose is
@@ -127,10 +116,7 @@ export default function CheckinDialog() {
       onClick={(event) => {
         if (event.target === dialogRef.current) close();
       }}
-      onClose={() => {
-        setError(null);
-        setCode("");
-      }}
+      onClose={() => setError(null)}
     >
       <div className="checkin-inner">
         <header className="checkin-head">
@@ -200,7 +186,7 @@ export default function CheckinDialog() {
             <p className="checkin-aboard-line">
               {pass.miles
                 ? "You are aboard. Go build the thing."
-                : "Pass reissued. You already boarded on this code, so no extra miles."}
+                : "Pass reissued. You already boarded this session, so no extra miles."}
             </p>
 
             <div className="checkin-actions">
@@ -224,6 +210,10 @@ export default function CheckinDialog() {
                   setPhase(event.target.value);
                   setError(null);
                 }}
+                // The code field used to carry these. The picker is now the
+                // only thing that can be wrong, so the error points here.
+                aria-describedby={error ? errorId : undefined}
+                aria-invalid={error && phase === "" ? true : undefined}
               >
                 <option value="">Choose one…</option>
                 {PHASES.map((option) => (
@@ -251,29 +241,12 @@ export default function CheckinDialog() {
                   maxLength={STAMP_MAX}
                   autoComplete="off"
                   spellCheck={false}
+                  enterKeyHint="go"
+                  aria-describedby={error ? errorId : undefined}
+                  aria-invalid={error && !custom.trim() ? true : undefined}
                 />
               </div>
             )}
-
-            <div className="checkin-field">
-              <label htmlFor={codeId}>Boarding code</label>
-              <input
-                id={codeId}
-                type="text"
-                value={code}
-                onChange={(event) => {
-                  setCode(event.target.value);
-                  setError(null);
-                }}
-                placeholder="called out on the stream"
-                autoComplete="off"
-                autoCapitalize="characters"
-                spellCheck={false}
-                enterKeyHint="go"
-                aria-describedby={error ? errorId : undefined}
-                aria-invalid={error ? true : undefined}
-              />
-            </div>
 
             {/* The slot is always in the DOM, empty or not. Two reasons: the
                 panel keeps exactly one height, so an error never shoves the

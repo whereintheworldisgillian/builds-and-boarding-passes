@@ -54,7 +54,7 @@ app/
   hero-prompt.tsx the prompt in the hero — sends commands to the terminal
   commands.ts    the terminal's command set — THE FILE TO EDIT for commands
   departures.ts  the departure board's rows — read by page.tsx AND /board
-  checkin.ts     the boarding code and Build Miles — EDIT THIS BETWEEN STREAMS
+  checkin.ts     Build Miles and the build phases — THE FILE TO EDIT for check-in
   checkin-dialog.tsx  the check-in modal (client component)
   globals.css    THE ENTIRE VISUAL SYSTEM — ~2200 lines of plain CSS
 public/
@@ -74,7 +74,6 @@ handed over.
 | --- | --- |
 | Any words, any section | `app/page.tsx` |
 | The departure board's rows | `app/departures.ts` — changes the page *and* `/board` |
-| **The boarding code you call out on stream** | `app/checkin.ts` |
 | Build Miles per check-in, or the build phases offered | `app/checkin.ts` |
 | The terminal's commands, their text, and the links | `app/commands.ts` |
 | The terminal's welcome text or button label | `app/terminal.tsx` |
@@ -89,10 +88,10 @@ is baked into the keyframe percentages in `globals.css`. See the `HERO
 SLIDESHOW` comment there, and [DESIGN.md](DESIGN.md) for why new photos must go
 through the crop/re-encode pipeline first (EXIF GPS).
 
-`/checkin` issues the visitor a boarding pass for their own build. Two things to
-know before running it on stream: **the boarding code is readable in the JS
-bundle**, so it is a reason to be watching rather than security; and **nothing is
-saved yet**, so Build Miles reset when the tab closes. The dialog says so on
+`/checkin` issues the visitor a boarding pass for their own build. Pick a phase,
+press Board — there is no code to enter. One thing to know before running it on
+stream: **nothing is saved yet**, so Build Miles reset when the tab closes, and
+miles are paid once per session rather than per submission. The dialog says so on
 screen. Both stop being true when the backend lands.
 
 A command's place in `/help` is not something you set. `/help` splits into

@@ -287,10 +287,14 @@ is the viewer's journey. So the check-in asks where *their* build is, sends it t
 SHIPPED, and collects no geography and no personal data. Nothing in it needs
 editing when the studio moves.
 
-**`app/checkin.ts` is the file to edit between streams** — the boarding code and
-the miles are two lines. The code ships in the JS bundle, so it is a
-participation token rather than security: it gives people a reason to be
-watching, and that is all it has to do.
+**Checking in is a click.** A boarding code called out on stream gated this at
+first, and it went for two reasons. It could not do the job — the answer ships
+in the JS bundle for anyone to read, so it never proved attendance, only the
+willingness to type. And it charged every visitor that typing tax up front, at
+the one moment they had already decided to take part. Gating this properly needs
+a server; until there is one, the open version is the honest one.
+
+**`app/checkin.ts` is the file to edit** — the miles and the build phases.
 
 **Nothing is persisted.** There is no account to attach a stamp to. The dialog
 says so on screen, in the same amber the terminal gives anything scheduled — a
@@ -316,8 +320,9 @@ Four things that are load-bearing:
 - **Shipped routes to `NEXT ONE`.** A pass reading SHIPPED → SHIPPED is a dead
   end, and whoever just shipped is exactly who to point at the next thing.
 
-Miles are paid per boarding code, not per submission, so reissuing a pass to try
-a different phase cannot farm them.
+Miles are paid **once per session**, not once per submission, or "Change my pass"
+would be a button that prints money. The boarding code used to be what bounded
+that; without it, the session is. Real limits arrive with the backend.
 
 ### Keyboard
 
