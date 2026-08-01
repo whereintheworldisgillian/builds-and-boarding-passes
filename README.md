@@ -56,6 +56,8 @@ app/
   departures.ts  the departure board's rows — read by page.tsx AND /board
   checkin.ts     Build Miles and the build phases — THE FILE TO EDIT for check-in
   checkin-dialog.tsx  the check-in modal (client component)
+  journey.ts     what a passport holds — THE SHAPE THE BACKEND WILL STORE
+  passport-dialog.tsx the passport (client component)
   globals.css    THE ENTIRE VISUAL SYSTEM — ~2200 lines of plain CSS
 public/
   fonts/         Geist Sans + Geist Mono, self-hosted woff2
@@ -75,6 +77,7 @@ handed over.
 | Any words, any section | `app/page.tsx` |
 | The departure board's rows | `app/departures.ts` — changes the page *and* `/board` |
 | Build Miles per check-in, or the build phases offered | `app/checkin.ts` |
+| Tier names and their thresholds | `TIERS` in `app/journey.ts` |
 | The terminal's commands, their text, and the links | `app/commands.ts` |
 | The terminal's welcome text or button label | `app/terminal.tsx` |
 | The hero prompt's placeholder or its chips | `app/hero-prompt.tsx` |
@@ -89,10 +92,19 @@ SLIDESHOW` comment there, and [DESIGN.md](DESIGN.md) for why new photos must go
 through the crop/re-encode pipeline first (EXIF GPS).
 
 `/checkin` issues the visitor a boarding pass for their own build. Pick a phase,
-press Board — there is no code to enter. One thing to know before running it on
-stream: **nothing is saved yet**, so Build Miles reset when the tab closes, and
-miles are paid once per session rather than per submission. The dialog says so on
-screen. Both stop being true when the backend lands.
+press Board — there is no code to enter. `/passport` opens the document that
+reads it back: one stamp slot per build phase, a running Build Miles total, and a
+tier. Together they are the whole loop — check in, earn, watch it land.
+
+Two things to know before running them on stream. **Nothing is saved yet**, so a
+passport empties when the tab closes; both dialogs say so on screen. And **miles
+are paid once per phase**, not once per check-in — a new phase pays, re-stamping
+one you already hold re-dates it and pays nothing. That caps a full page at six
+payouts. Both stop being true when the backend lands.
+
+**`app/journey.ts` is worth reading before designing any table.** Its `Journey`
+type is deliberately written as the row the backend will eventually store, so the
+schema decision gets made after the product is understood rather than before.
 
 A command's place in `/help` is not something you set. `/help` splits into
 **Working now** and **Scheduled** by asking each command what it replies with —

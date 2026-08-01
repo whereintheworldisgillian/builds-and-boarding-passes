@@ -20,11 +20,13 @@ import {
 } from "./commands";
 import { OPEN_CHECKIN } from "./checkin";
 import { DEPARTURES } from "./departures";
+import { OPEN_PASSPORT } from "./journey";
 
 /* --------------------------------------------------------------------------
    The floating terminal launcher and its console panel.
 
-   One of three client components — with hero-prompt.tsx and checkin-dialog.tsx.
+   One of four client components — with hero-prompt.tsx, checkin-dialog.tsx and
+   passport-dialog.tsx.
    page.tsx stays a server component, so the rest of the page still ships as
    static markup with no JavaScript attached to it.
 
@@ -160,6 +162,14 @@ export default function Terminal() {
           // transcript is still here when they come back.
           close();
           window.dispatchEvent(new CustomEvent(OPEN_CHECKIN));
+          break;
+
+        case "passport":
+          push({ kind: "lines", tone: "normal", lines: reply.lines });
+          // Closes for the same reason /checkin does — a modal over an open
+          // console is a mess at any width.
+          close();
+          window.dispatchEvent(new CustomEvent(OPEN_PASSPORT));
           break;
 
         case "lines":

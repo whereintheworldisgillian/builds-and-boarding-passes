@@ -44,6 +44,11 @@ export type Reply =
   | { kind: "clear" }
   /** Print lines, close the console, and open the check-in dialog over the page. */
   | { kind: "checkin"; lines: string[] }
+  /** Same, for the passport. Deliberately its own kind rather than a shared
+      "panel" kind carrying an event name: collapsing the two would mean editing
+      /checkin's reply type, and that command already works. Worth doing on the
+      third panel, not the second. */
+  | { kind: "passport"; lines: string[] }
   /** Open a URL in a new tab, or explain that there is not one yet. */
   | { kind: "open"; url: string | null; lines: string[]; pendingLines: string[] };
 
@@ -139,14 +144,13 @@ export const COMMANDS: Command[] = [
   },
   {
     name: "passport",
-    summary: "Opens the community passport preview",
+    summary: "Opens your passport — stamps, miles and tier",
+    // No longer pending, so isLive() moves it into /help's "Working now" on its
+    // own. What it is honest about now lives on the document itself: the stamps
+    // are real, and nothing is saved yet. See app/journey.ts.
     reply: () => ({
-      kind: "lines",
-      pending: true,
-      lines: [
-        "Passport — coming in Phase 1.",
-        "Stamps, Build Miles, and one slot per stop.",
-      ],
+      kind: "passport",
+      lines: ["Opening your passport."],
     }),
   },
   {
@@ -172,7 +176,10 @@ export const COMMANDS: Command[] = [
         "Styling     Plain CSS",
         "Model       Claude Opus 5",
         "No UI kit, no CSS-in-JS, no animation library.",
-        "One page, one stylesheet, one client component.",
+        // Was "one client component". It has been false since hero-prompt.tsx
+        // and this made it further off — and a line claiming to be the honest
+        // answer cannot be the one thing on screen that is out of date.
+        "One page, one stylesheet, four components.",
       ],
     }),
   },

@@ -10,6 +10,7 @@ import {
   STAMP_MAX,
   toStamp,
 } from "./checkin";
+import { checkIn, OPEN_PASSPORT, useJourney } from "./journey";
 
 /* --------------------------------------------------------------------------
    The check-in dialog.
@@ -24,8 +25,11 @@ import {
    to keep it on, so a check-in lives as long as the tab does. That is a real
    limitation and the panel says so on screen — this project's rule is that
    nothing pretends to work, and a counter that silently resets would be exactly
-   that. It becomes permanent when the backend lands; no other change is needed
-   here beyond where these two useStates read from.
+   that.
+
+   The miles and the stamps do not live here any more: they live in
+   app/journey.ts, because the passport reads them too. This file owns the form
+   and the issued ticket, and nothing else.
    -------------------------------------------------------------------------- */
 
 type Pass = { from: string; to: string; miles: number };
@@ -39,11 +43,7 @@ export default function CheckinDialog() {
   const [error, setError] = useState<string | null>(null);
 
   const [pass, setPass] = useState<Pass | null>(null);
-  const [miles, setMiles] = useState(0);
-  // Miles are paid once per session, not once per submission — otherwise
-  // "Change my pass" would be a button that prints money. The boarding code
-  // used to be what bounded this; without it, the session is.
-  const [earned, setEarned] = useState(false);
+  const journey = useJourney();
 
   const titleId = useId();
   const phaseId = useId();
@@ -58,6 +58,17 @@ export default function CheckinDialog() {
       // Guard: showModal() throws if the dialog is already open, and /checkin
       // can be run again while it is.
       if (!dialog || dialog.open) return;
+      // Always open on the form, never on the last receipt. This mattered less
+      // when a session held one check-in; now that there is a stamp per phase
+      // there is a real reason to run /checkin again, and landing on the ticket
+      // you already have makes "Change my pass" a toll on the way to the thing
+      // you asked for. The pass is not lost — it is in the passport.
+      //
+      // Reset here rather than in onClose: the dialog's `close` event does not
+      // fire reliably (verified — close() flips .open with no event), so
+      // anything hung off it is a hook that silently never runs.
+      setPass(null);
+      setError(null);
       dialog.showModal();
       // The browser focuses the first focusable child, which is the close
       // button. Sending focus to the first real question is kinder.
@@ -85,13 +96,12 @@ export default function CheckinDialog() {
       return;
     }
 
-    // Reissuing gives them the pass they meant, but only the first check-in of
-    // the session pays.
-    const payout = earned ? 0 : MILES_PER_CHECKIN;
-    if (!earned) {
-      setEarned(true);
-      setMiles((current) => current + payout);
-    }
+    // One slot per phase, and a slot pays once. Re-checking-in at a phase you
+    // already hold re-dates the stamp and pays nothing, so "Change my pass"
+    // cannot print money — the ceiling is one payout per phase, which is one
+    // full passport page. The rule lives in journey.ts because the passport has
+    // to agree with it.
+    const payout = checkIn(chosen.value, stamp, MILES_PER_CHECKIN);
 
     setError(null);
     setPass({ from: stamp, to: destinationFor(stamp), miles: payout });
@@ -116,7 +126,8 @@ export default function CheckinDialog() {
       onClick={(event) => {
         if (event.target === dialogRef.current) close();
       }}
-      onClose={() => setError(null)}
+      // Deliberately no onClose. The reset lives in the open handler above,
+      // because this element's `close` event does not fire.
     >
       <div className="checkin-inner">
         <header className="checkin-head">
@@ -166,7 +177,7 @@ export default function CheckinDialog() {
                 </div>
                 <div>
                   <span>Build miles</span>
-                  <strong>{miles.toLocaleString()}</strong>
+                  <strong>{journey.miles.toLocaleString()}</strong>
                 </div>
                 <div>
                   <span>Issued at</span>
@@ -185,16 +196,29 @@ export default function CheckinDialog() {
 
             <p className="checkin-aboard-line">
               {pass.miles
-                ? "You are aboard. Go build the thing."
-                : "Pass reissued. You already boarded this session, so no extra miles."}
+                ? "You are aboard. The stamp is in your passport."
+                : "Stamp re-dated. You already held this one, so no extra miles."}
             </p>
 
+            {/* The payoff, so it takes the primary button. This is the whole
+                journey in one move: check in, earn, see it land. */}
+            <button
+              type="button"
+              className="checkin-board"
+              onClick={() => {
+                close();
+                window.dispatchEvent(new CustomEvent(OPEN_PASSPORT));
+              }}
+            >
+              See your passport
+            </button>
+
             <div className="checkin-actions">
-              <button type="button" className="checkin-board" onClick={close}>
-                Done
-              </button>
               <button type="button" className="checkin-again" onClick={startOver}>
                 Change my pass
+              </button>
+              <button type="button" className="checkin-again" onClick={close}>
+                Done
               </button>
             </div>
           </div>

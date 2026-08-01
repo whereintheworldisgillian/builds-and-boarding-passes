@@ -72,9 +72,15 @@ That contrast is the identity — keep it when writing new sections.
 
 Scroll-driven CSS only — `animation-timeline: view()` for the `.reveal`
 sections and `animation-timeline: scroll(root block)` for the nav morph.
-**There is no JavaScript driving any of it**, which is worth knowing before
+**No JavaScript drives any of the page's motion**, which is worth knowing before
 reaching for an observer hook. Browsers without support get the content
 plainly, and `prefers-reduced-motion` flattens everything.
+
+**The one exception is the passport's tilt**, and it is scoped to that document
+inside its dialog. Even there the script only writes two custom properties on
+`pointermove` — CSS owns the transform, nothing is measured per frame beyond one
+rect, and it costs nothing until a mouse is over the document. See "The
+passport" below.
 
 ## Motion performance rules
 
@@ -209,8 +215,8 @@ Three things that are load-bearing:
 
 ## The terminal
 
-`app/terminal.tsx` is one of **three client components**, with `hero-prompt.tsx`
-and `checkin-dialog.tsx`.
+`app/terminal.tsx` is one of **four client components**, with `hero-prompt.tsx`,
+`checkin-dialog.tsx` and `passport-dialog.tsx`.
 `page.tsx` stays a server component; the interactive corner is isolated so the
 rest of the page still ships as static markup with nothing attached to it.
 
@@ -219,7 +225,7 @@ a command is one entry in `COMMANDS`; `terminal.tsx` renders whatever is there
 and needs no changes.
 
 Replies are typed as a small union — `help`, `lines`, `scroll`, `board`, `clear`,
-`checkin`, `open` — and each renders in one of three tones:
+`checkin`, `passport`, `open` — and each renders in one of three tones:
 
 | Tone | Colour | Means |
 | --- | --- | --- |
@@ -320,9 +326,58 @@ Four things that are load-bearing:
 - **Shipped routes to `NEXT ONE`.** A pass reading SHIPPED → SHIPPED is a dead
   end, and whoever just shipped is exactly who to point at the next thing.
 
-Miles are paid **once per session**, not once per submission, or "Change my pass"
-would be a button that prints money. The boarding code used to be what bounded
-that; without it, the session is. Real limits arrive with the backend.
+Miles are paid **once per phase**, not once per submission, or "Change my pass"
+would be a button that prints money. It was once per *session* until the passport
+arrived — but six stamp slots and a tier ladder do not work with a single payout,
+because you would earn 1,240, fill five more slots and never leave the first
+tier. So the stamp and the miles now share one rule: a new phase pays, a re-stamp
+re-dates and pays nothing. The ceiling is six payouts, which is one full page.
+
+**`/checkin` always opens on the form**, never on the last receipt. It reset on
+close at first, and that hook never ran — this element's `close` event does not
+fire, so the reset lives in the open handler. Worth knowing before hanging
+anything else off `onClose`.
+
+## The passport
+
+`/passport` opens the document that reads the check-in back. Where the boarding
+pass is a warm `--paper-bright` ticket, the passport is an ink cover that opens
+onto **cool security stock** — a wash from `#DDE3E2` to `#DFE5DA`. They are not
+meant to look like the same paper: a ticket is warm and disposable, a document is
+issued. What ties them together is vocabulary — `.barcode`, the dashed rules, the
+mono label spec.
+
+**`app/journey.ts` is the backend preview.** The `Journey` type is the row, and
+the store is module-level with `subscribe`/`getSnapshot` read through
+`useSyncExternalStore`. Not context: `page.tsx` is a server component and the two
+dialogs are separate client islands under it, so a provider would mean wrapping
+the page and giving up static rendering.
+
+Five things that are load-bearing:
+
+- **`--orange` is banned inside the passport.** It measures **2.3:1** on this
+  stock and fails even the large-text bar. The newest stamp carries `#B23A22`
+  instead, at 4.6:1 — which is also the commonest ink in a real passport. Every
+  muted ink on the page is `rgba(16, 24, 26, 0.66)` for the same reason; 0.58 and
+  0.55 both measured under 4.5.
+- **Empty stamp slots are not dimmed with `opacity`.** That was the first version
+  and it multiplied with every colour inside, landing "UNSTAMPED" near 1.9:1.
+  Empty reads through the dashed border and a lighter ink instead.
+- **The document is portrait at every width, and never reflows.** Both faces
+  share one grid cell so the container is as tall as the taller of them — which
+  is what makes the cover page-sized without a fixed height. A two-page landscape
+  spread was the first plan, and it forced a landscape *cover*.
+- **The face turned away is `inert`.** `backface-visibility` hides it from the
+  eye but not from the tab order, so without that the holder field is reachable
+  straight through a closed cover.
+- **Focus is moved into the dialog by hand on open.** Every control on the back
+  face is inert and the front face has no autofocus, so the browser leaves focus
+  on `<body>` — which also swallows Escape, since there is nothing inside the
+  dialog for the close request to reach. A button either way, never the holder
+  field: focusing a text input on open throws up the keyboard on a phone.
+
+The emblem is CSS only — a masked `repeating-conic-gradient` tick ring inside two
+dashed circles, with the hero's own `✈` at its 12°. No image, painted once.
 
 ### Keyboard
 

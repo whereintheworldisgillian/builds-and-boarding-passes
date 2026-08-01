@@ -1,4 +1,5 @@
 import CheckinDialog from "./checkin-dialog";
+import PassportDialog from "./passport-dialog";
 import { DEPARTURES } from "./departures";
 import HeroPrompt from "./hero-prompt";
 import Terminal from "./terminal";
@@ -360,6 +361,7 @@ export default function HomePage() {
           until showModal(), so its position in the document does not matter to
           the layout — but it sits last for the same reason the terminal does. */}
       <CheckinDialog />
+      <PassportDialog />
     </main>
   );
 }
