@@ -239,8 +239,16 @@ function EmptySlot({ label }: { label: string }) {
 export default function PassportDialog() {
   const dialogRef = useRef<HTMLDialogElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
-  const coverRef = useRef<HTMLButtonElement>(null);
-  const closeRef = useRef<HTMLButtonElement>(null);
+  /* Every programmatic focus lands here rather than on a control.
+
+     Focus still has to enter the dialog — Escape has nothing to close without
+     it, and a screen reader announces nothing. But moving it onto the cover
+     button or the × painted a focus ring on open and after every flip, for
+     someone who had only ever used a mouse. A tabindex="-1" container takes
+     focus without being a control, so nothing lights up, Tab from here still
+     walks the dialog in order, and a real keyboard user still gets a ring the
+     moment they Tab onto something. */
+  const innerRef = useRef<HTMLDivElement>(null);
 
   const journey = useJourney();
 
@@ -279,9 +287,7 @@ export default function PassportDialog() {
     openRef.current = open;
     if (!dialogRef.current?.open || !flipped.current) return;
     flipped.current = false;
-    // A button either way, never the holder field: focusing a text input throws
-    // up the keyboard on a phone before anyone asked to type.
-    (open ? closeRef.current : coverRef.current)?.focus();
+    innerRef.current?.focus();
   }, [open]);
 
   useEffect(() => {
@@ -292,18 +298,12 @@ export default function PassportDialog() {
       if (!dialog || dialog.open) return;
       setCountries((current) => (current.length ? current : countryNames()));
       dialog.showModal();
-      // Focus has to land on the face that is actually in front. Without this it
-      // stays on <body>: every control on the hidden face is inert, the front
-      // face has no autofocus, and the browser gives up — which also swallows
-      // Escape, because there is nothing focused inside the dialog for the
-      // close request to reach.
-      //
-      // A button either way, never the holder field: focusing a text input on
-      // open throws up the keyboard on a phone before anyone asked to type.
-      window.setTimeout(() => {
-        const target = openRef.current ? closeRef.current : coverRef.current;
-        target?.focus();
-      }, 0);
+      // Focus has to enter the dialog. Without this it stays on <body>: every
+      // control on the hidden face is inert, the front face has no autofocus,
+      // and the browser gives up — which also swallows Escape, because there is
+      // nothing focused inside the dialog for the close request to reach.
+      // See the note on innerRef for why it is the container and not a button.
+      window.setTimeout(() => innerRef.current?.focus(), 0);
     };
     window.addEventListener(OPEN_PASSPORT, onOpen);
     return () => window.removeEventListener(OPEN_PASSPORT, onOpen);
@@ -382,7 +382,9 @@ export default function PassportDialog() {
         </filter>
       </svg>
 
-      <div className="passport-inner">
+      {/* tabIndex -1 so focus can be parked here without this being a control.
+          See the note on innerRef. */}
+      <div className="passport-inner" ref={innerRef} tabIndex={-1}>
         <header className="passport-head">
           <div>
             <p className="passport-eyebrow">Travel document</p>
@@ -391,7 +393,6 @@ export default function PassportDialog() {
           <button
             type="button"
             className="checkin-close"
-            ref={closeRef}
             onClick={close}
             aria-label="Close passport"
           >
@@ -414,7 +415,6 @@ export default function PassportDialog() {
                 <button
                   type="button"
                   className="passport-cover"
-                  ref={coverRef}
                   onClick={() => {
                     flipped.current = true;
                     setOpen(true);

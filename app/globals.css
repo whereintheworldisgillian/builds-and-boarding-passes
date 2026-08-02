@@ -3314,6 +3314,15 @@ footer p:last-child {
   padding: 1.25rem;
 }
 
+/* This carries tabindex="-1" purely so focus can enter the dialog — it is a
+   container, not a control, and it must never look like one. Painting a ring
+   here is what put an orange box round the whole document every time it opened
+   or the leaf turned. Real controls still get their own ring on Tab. */
+.passport-inner:focus,
+.passport-inner:focus-visible {
+  outline: none;
+}
+
 /* ---- The 3D rig -------------------------------------------------------- */
 
 /* Three nested elements, one job each: the stage owns perspective and is what
@@ -3848,11 +3857,22 @@ footer p:last-child {
   cursor: pointer;
 }
 
+/* The field's own rule going solid IS the focus indicator — no outline.
+
+   An orange box round Holder and Nationality was wrong twice over. It is the
+   one colour banned from this paper (2.3:1 on the wash), and a text input
+   matches :focus-visible whenever it is focused, click included, so it fired
+   the entire time anyone was typing.
+
+   This is not "focus removed": the rule goes from 1px dashed at 42% ink to 2px
+   solid at full ink, which is a large, high-contrast change on the exact
+   element being edited. The padding gives back the pixel the thicker rule
+   takes, so nothing below it shifts. */
 .passport-field input:focus-visible,
 .passport-field select:focus-visible {
-  outline: 2px solid var(--orange);
-  outline-offset: 3px;
-  border-bottom-color: var(--ink);
+  outline: none;
+  padding-bottom: calc(0.3rem - 1px);
+  border-bottom: 2px solid var(--ink);
 }
 
 .passport-rows {

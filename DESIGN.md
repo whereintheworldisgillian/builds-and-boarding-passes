@@ -418,8 +418,18 @@ Six things that are load-bearing:
   element does nothing at all, silently. Focus fell to `<body>`, which also
   swallows Escape. The effect on `open` runs after the commit, when the inert
   flags match what is on screen.
-- **A button is always the focus target, never the holder field** — focusing a
-  text input throws up the keyboard on a phone before anyone asked to type.
+- **Programmatic focus lands on the `tabindex="-1"` container, never a control.**
+  Parking it on the cover or the × painted a focus ring every time the document
+  opened or the leaf turned, for someone who had only ever used a mouse. The
+  container takes focus without being a control, so nothing lights up, Escape
+  still has somewhere to land, and a real keyboard user still gets a ring the
+  moment they Tab onto something.
+- **Holder and Nationality show focus as a solid rule, not an outline.** A text
+  input matches `:focus-visible` whenever it is focused — click included — so an
+  outline there fired the entire time anyone was typing, in the one colour
+  banned from this paper. The rule going from 1px dashed at 42% ink to 2px solid
+  at full ink is the indicator instead, and the padding gives back the pixel so
+  nothing shifts. This is a different indicator, not a missing one.
 
 **Stamps are circular, and the arcs carry only fixed text.** Text on a path
 cannot wrap or shrink, and `DEBUGGING` alone already crowds a ring that size — a
