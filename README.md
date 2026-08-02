@@ -93,8 +93,10 @@ through the crop/re-encode pipeline first (EXIF GPS).
 
 `/checkin` issues the visitor a boarding pass for their own build. Pick a phase,
 press Board — there is no code to enter. `/passport` opens the document that
-reads it back: one stamp slot per build phase, a running Build Miles total, and a
-tier. Together they are the whole loop — check in, earn, watch it land.
+reads it back: a cover that swings open on its spine to a two-page spread —
+stamps on the left, data page and a real ICAO machine-readable strip on the
+right. Together they are the whole loop — check in, earn, watch it land.
+(Phones get a single page; two pages on a 390px screen are two 160px pages.)
 
 Two things to know before running them on stream. **Nothing is saved yet**, so a
 passport empties when the tab closes; both dialogs say so on screen. And **miles

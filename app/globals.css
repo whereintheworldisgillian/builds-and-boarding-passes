@@ -3260,8 +3260,9 @@ footer p:last-child {
   }
 }
 
+
 /* ==========================================================================
-   THE PASSPORT — the document, and the cover that opens onto it
+   THE PASSPORT — a document that opens like a book
 
    A native <dialog>, same as the check-in, so the focus trap, Escape, the inert
    background and focus-return are the platform's. Everything here is
@@ -3269,9 +3270,8 @@ footer p:last-child {
 
    THE INTERIOR IS NOT THE BOARDING PASS. The pass is warm --paper-bright,
    because a ticket is warm and disposable. A passport is cool security stock,
-   because a document is issued. That difference is the point — they are not
-   meant to look like the same piece of paper. What ties them together is
-   vocabulary instead: .barcode, the dashed rules, the mono label spec.
+   because a document is issued. What ties them together is vocabulary — the
+   dashed rules and the mono label spec — not colour.
    ========================================================================== */
 
 .passport {
@@ -3279,11 +3279,7 @@ footer p:last-child {
      have come from the backdrop, which is what closes it. Same contract as
      .checkin. */
   padding: 0;
-  /* PORTRAIT, and narrower than the check-in. A closed passport is taller than
-     it is wide, and the first draft of this was 38rem — which made the cover
-     landscape and read as a card, not a document. The book takes its height
-     from the spread (see .passport-book), so constraining the width here is
-     what makes the proportion right at every size. */
+  /* One page. The spread widens this at 760px — see the bottom of this file. */
   width: min(26rem, calc(100vw - 2rem));
   max-height: calc(100dvh - 2rem);
   color: var(--paper-bright);
@@ -3291,8 +3287,9 @@ footer p:last-child {
   border: 1px solid var(--white-line);
   border-radius: 1rem;
   box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.6);
-  /* The tilt swings the document a few degrees past its own box. Clipping that
-     axis is what stops a scrollbar appearing every time the pointer moves. */
+  /* The tilt swings the document a few degrees past its own box, and the closed
+     book sits half a page off-centre. Clipping this axis is what stops a
+     scrollbar appearing every time the pointer moves. */
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -3301,6 +3298,14 @@ footer p:last-child {
 
 .passport::backdrop {
   background: rgba(7, 13, 14, 0.72);
+}
+
+/* Holds the one feTurbulence every stamp reuses. Out of flow and out of the
+   accessibility tree; it renders nothing itself. */
+.passport-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
 }
 
 .passport-inner {
@@ -3313,10 +3318,10 @@ footer p:last-child {
 
 /* Three nested elements, one job each: the stage owns perspective and is what
    the pointer is measured against, the tilt owns the pointer rotation, the book
-   owns the flip. Composing all of it onto one element would mean one transform
+   owns the hinge. Composing all of it onto one element would mean one transform
    string fighting itself. */
 .passport-stage {
-  perspective: 1400px;
+  perspective: 1600px;
   perspective-origin: 50% 50%;
 }
 
@@ -3325,10 +3330,9 @@ footer p:last-child {
 }
 
 /* The tilt is the one piece of JavaScript-driven motion on this site. It earns
-   it: it is pointer-driven rather than infinite, so it costs nothing until a
-   mouse is actually over the document, and the script sets two custom
-   properties and never touches a style property. Transform only — see the
-   motion rules in DESIGN.md.
+   it: pointer-driven rather than infinite, so it costs nothing until a mouse is
+   over the document, and the script sets custom properties and never touches a
+   style property. Transform only — see the motion rules in DESIGN.md.
 
    Gated on a fine pointer because there is no hover to track on a touchscreen,
    and a phone would just get a document stuck at whatever angle it was last
@@ -3340,42 +3344,47 @@ footer p:last-child {
   }
 }
 
-/* Both faces live in ONE grid cell, so the container is as tall as the taller
-   of them and the cover is naturally page-sized — which is what a passport
-   cover is. No fixed height to keep in sync with the content.
-
-   Do not put overflow on this element: it would flatten the 3D context and the
-   flip would collapse to a squash. */
 .passport-book {
-  display: grid;
+  position: relative;
   transform-style: preserve-3d;
-  transition: transform 620ms cubic-bezier(0.6, 0.02, 0.2, 1);
 }
 
-.passport-book[data-open="true"] {
-  transform: rotateY(180deg);
+/* THE LEAF is the cover AND the page inside it — one piece of card, which is
+   what it is in a real passport. That is the whole trick: swinging the cover
+   off the data page cannot reveal a separate left page, because the cover would
+   land on top of it. The surface you read on the left IS the cover's back. */
+.passport-leaf {
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 700ms cubic-bezier(0.62, 0.02, 0.2, 1);
 }
 
 .passport-cover,
-.passport-spread {
-  position: relative;
-  grid-area: 1 / 1;
-  overflow: hidden;
-  border-radius: 0.9rem;
+.passport-page {
+  border-radius: 0.75rem;
   /* Hides the face turned away from the eye — but NOT from the tab order, which
-     is why passport-dialog.tsx also marks it inert. Without that, the holder
-     field is tabbable straight through a closed cover. */
+     is why passport-dialog.tsx also marks each face inert. Without that, the
+     holder field is tabbable straight through a closed cover. */
   backface-visibility: hidden;
 }
 
-.passport-spread {
+/* Both faces of the leaf share one grid cell, so it is exactly as tall as the
+   taller of them and the cover is naturally page-sized. */
+.passport-leaf > * {
+  grid-area: 1 / 1;
+}
+
+.passport-leaf {
+  display: grid;
+}
+
+.passport-page-stamps {
   transform: rotateY(180deg);
 }
 
 /* ---- The sheen --------------------------------------------------------- */
 
-/* Laminate, not decoration: a real data page is glossy and a passport cover is
-   not flat matte either. It tracks the pointer through the same two custom
+/* Laminate, not decoration. It tracks the pointer through the same custom
    properties the tilt reads, so the highlight and the angle agree. */
 .passport-sheen {
   position: absolute;
@@ -3396,23 +3405,16 @@ footer p:last-child {
   opacity: 1;
 }
 
-/* White at 0.3 disappears on pale stock. The interior is laminated, so it
-   should catch more light than the cover does, not less. */
-.passport-spread .passport-sheen {
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(255, 255, 255, 0.62),
-    rgba(255, 255, 255, 0) 52%
-  );
-}
-
 /* ---- The cover --------------------------------------------------------- */
 
 .passport-cover {
+  position: relative;
+  z-index: 2;
   display: grid;
   grid-template-rows: auto 1fr auto;
   justify-items: center;
   align-items: center;
+  overflow: hidden;
   gap: 1.2rem;
   padding: 1.5rem 1.25rem 1.25rem;
   color: var(--acid);
@@ -3446,7 +3448,7 @@ footer p:last-child {
 
 /* The emblem. Built from this site's own vocabulary — the dashed rule that runs
    through the boarding pass, and the plane glyph from the hero's route line,
-   turned into a ring. No image, no icon library, painted once. */
+   turned into a ring. No image, painted once. */
 .passport-seal {
   position: relative;
   display: grid;
@@ -3526,39 +3528,252 @@ footer p:last-child {
   text-transform: uppercase;
 }
 
-/* ---- The spread -------------------------------------------------------- */
+/* ---- The pages --------------------------------------------------------- */
 
 /* Cool security stock, and a WASH rather than a flat fill — a real data page
-   fades between two security tints across the page, and one flat colour reads
-   as a UI panel instead of paper.
+   fades between two security tints, and one flat colour reads as a UI panel
+   instead of paper.
 
    --orange IS BANNED IN HERE. It measures 2.3:1 on this stock, which fails even
    the large-text bar. The deep red below does the "newest thing leads the eye"
-   job at 5.4:1. Re-measure before putting any of the site's warm accents on
-   this background. */
-.passport-spread {
-  display: grid;
-  gap: 1.1rem;
-  align-content: start;
-  padding: 1.25rem;
+   job instead. Re-measure before putting any of the site's warm accents on this
+   background. */
+.passport-page {
+  position: relative;
+  overflow: hidden;
+  padding: 1.05rem 0.95rem;
   color: var(--ink);
   background: linear-gradient(#dde3e2 0%, #dfe5da 100%);
 }
 
-/* One column at every width, on purpose. A two-page landscape spread was the
-   first plan, and it fought the portrait cover — the two faces share one box,
-   so a landscape interior forces a landscape cover. This is the right-hand page
-   of a passport, which is where all the information lives anyway. */
-@media (min-width: 480px) {
-  .passport-spread {
-    padding: 1.6rem;
-  }
+/* Guilloche and microprint, generated in the component. Absolutely positioned
+   under everything, so no text sits in the same stacking context as it.
+
+   KEEP IT FAINT. Every colour on this page was measured against the wash, and
+   the pattern eats into that margin — the stroke alpha here is what the
+   measurements assume. */
+.passport-paper {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
 }
 
-.passport-data {
+.passport-microprint {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 5px;
+  letter-spacing: 1.1px;
+  fill: #2c4a45;
+}
+
+/* Flex column, not a grid: the strip at the foot of each page is pushed down
+   with `margin-top: auto`, which needs a flex parent. In a grid with
+   align-content:start it does nothing, and the MRZ floated in the middle of the
+   page with blank paper under it. */
+.passport-page-ink {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  height: 100%;
+}
+
+.passport-page-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin: 0;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px dashed rgba(16, 24, 26, 0.32);
+}
+
+.passport-page-head strong {
+  font-size: 0.68rem;
+}
+
+/* ---- Stamps ------------------------------------------------------------ */
+
+.passport-slots {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.35rem 0.25rem;
+  place-items: center;
+}
+
+.passport-stamp {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  max-width: 5.6rem;
+  aspect-ratio: 1;
+  /* Deep red, the commonest ink in a real passport, and the one warm colour
+     that survives this paper. It was #b23a22 until the guilloche went in, which
+     dropped it to 2.82:1 — under the 3.0 large-text bar. This clears it with
+     room. --orange never gets near this page: it measures 2.3:1 on the bare
+     wash and worse over the pattern. */
+  color: #9e3320;
+}
+
+.passport-stamp > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  stroke: currentColor;
+}
+
+/* The struck stamps only. feTurbulence roughens the ring and the arcs so the
+   impression looks pressed rather than printed, and the mask thins the ink
+   across the face the way a real pad does. Static — painted once. */
+.passport-stamp:not([data-empty="true"]) > svg {
+  filter: url(#passport-ink);
+  -webkit-mask-image: radial-gradient(
+    118% 92% at 32% 26%,
+    #000 40%,
+    rgba(0, 0, 0, 0.74) 68%,
+    rgba(0, 0, 0, 0.42) 100%
+  );
+  mask-image: radial-gradient(
+    118% 92% at 32% 26%,
+    #000 40%,
+    rgba(0, 0, 0, 0.74) 68%,
+    rgba(0, 0, 0, 0.42) 100%
+  );
+}
+
+.passport-stamp-arc {
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 1.3px;
+  fill: currentColor;
+  stroke: none;
+  text-transform: uppercase;
+}
+
+.passport-stamp-arc-small {
+  font-size: 7px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+}
+
+/* The centre is ordinary HTML, not text on a path — that is what lets a
+   14-character custom stamp wrap and shrink instead of running off the ring.
+   See the comment on Stamp() in passport-dialog.tsx. */
+.passport-stamp-face {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  justify-items: center;
+  gap: 0.1rem;
+  width: 62%;
+  text-align: center;
+}
+
+.passport-stamp-word {
+  font-family: var(--font-geist-sans), sans-serif;
+  font-weight: 800;
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.passport-stamp-date {
+  font-size: 0.4rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Older strikes are ink, not colour. Only the newest keeps the red, so the
+   thing that just happened is the thing the eye lands on. */
+.passport-stamp:not([data-empty="true"]):not([data-newest="true"]) {
+  color: rgba(16, 24, 26, 0.72);
+}
+
+/* Empty reads through the dashed ring and a lighter ink, NOT through an opacity
+   on the whole slot. That was the first version and it multiplied with every
+   colour inside — "UNSTAMPED" landed near 1.9:1, unreadable. An empty slot
+   still has to say what it is waiting for. */
+.passport-stamp[data-empty="true"] {
+  color: rgba(16, 24, 26, 0.72);
+}
+
+/* The RING recedes, the words do not. Fading the whole slot is what broke this
+   the first time — it multiplied into the label and "UNSTAMPED" fell to 1.9:1.
+   Dropping only the graphic keeps the empty slot quiet and still legible. */
+.passport-stamp[data-empty="true"] > svg {
+  opacity: 0.6;
+}
+
+.passport-declaration {
+  margin: 0;
+  margin-top: auto;
+  padding-top: 0.6rem;
+  border-top: 1px dashed rgba(16, 24, 26, 0.28);
+  color: rgba(16, 24, 26, 0.74);
+  font-size: 0.5rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+/* ---- The data page ----------------------------------------------------- */
+
+.passport-identity {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: start;
+  gap: 0.7rem;
+}
+
+/* Where a real data page carries the portrait. */
+.passport-portrait {
+  display: grid;
+  place-items: center;
+  width: 3.6rem;
+  aspect-ratio: 3 / 4;
+  border: 1px solid rgba(16, 24, 26, 0.32);
+  background: rgba(255, 255, 255, 0.22);
+}
+
+/* The cover's seal, reprinted small and in ink rather than foil. */
+.passport-portrait .passport-seal {
+  width: 2.7rem;
+}
+
+.passport-portrait .passport-seal-ring {
+  background: repeating-conic-gradient(
+    from 0deg,
+    #2c4a45 0deg 0.5deg,
+    transparent 0.5deg 2.6deg
+  );
+  opacity: 0.5;
+}
+
+.passport-portrait .passport-seal::before {
+  border-color: rgba(44, 74, 69, 0.4);
+}
+
+.passport-portrait .passport-seal::after {
+  border-color: rgba(44, 74, 69, 0.26);
+}
+
+.passport-portrait .passport-seal-plane {
+  color: rgba(44, 74, 69, 0.75);
+  font-size: 0.7rem;
+}
+
+.passport-fields {
   display: grid;
   align-content: start;
-  gap: 0.9rem;
+  gap: 0.55rem;
 }
 
 /* The fields ARE the document. A real passport is blank until it is filled in,
@@ -3567,18 +3782,21 @@ footer p:last-child {
    vocabulary already uses. */
 .passport-field {
   display: grid;
-  gap: 0.25rem;
+  gap: 0.15rem;
 }
 
-/* 0.66, not the 0.58 this started at. Measured against the wash it was 4.05:1 —
-   under the 4.5 body-text bar. Every muted ink on this page is set from the
-   same value for that reason; check it against the background rather than
-   eyeballing it, because the background is a gradient and moves. */
+/* 0.74, and every muted ink on this page shares it.
+
+   It went 0.58 -> 0.66 when 0.58 measured 4.05:1 on the flat wash, then 0.66 ->
+   0.74 when the guilloche landed: line-work DARKENS the paper, which costs dark
+   text contrast rather than helping it, and 0.66 fell back to 4.09:1 against a
+   fully-inked pixel. Measure against the pattern, not the wash — and re-measure
+   if the pattern's opacity ever goes back up. */
 .passport-field label,
 .passport-rows span,
 .passport-tier span,
-.passport-stamps-head span {
-  color: rgba(16, 24, 26, 0.66);
+.passport-page-head span {
+  color: rgba(16, 24, 26, 0.74);
   font-size: 0.5rem;
   font-weight: 750;
   letter-spacing: 0.12em;
@@ -3589,15 +3807,15 @@ footer p:last-child {
 .passport-field select {
   width: 100%;
   /* 44px minimum — these are the only two things on the page a thumb has to
-     find, and at their natural 28px they were well under it. The weight sits
-     at the bottom of the box so the text still rests on its rule rather than
+     find, and at their natural 28px they were well under it. The weight sits at
+     the bottom of the box so the text still rests on its rule rather than
      floating in the middle of a tall field. */
   min-height: 2.75rem;
-  padding: 0.95rem 0 0.35rem;
+  padding: 0.95rem 0 0.3rem;
   color: var(--ink);
   background: none;
   border: 0;
-  border-bottom: 1px dashed rgba(16, 24, 26, 0.4);
+  border-bottom: 1px dashed rgba(16, 24, 26, 0.42);
   border-radius: 0;
   font: inherit;
   /* 16px. Anything smaller and iOS zooms the whole page on focus. */
@@ -3612,20 +3830,19 @@ footer p:last-child {
    than unfilled — so it is a real 4.5:1 placeholder, not the usual whisper. At
    0.42 it measured 2.58:1. */
 .passport-field input::placeholder {
-  color: rgba(16, 24, 26, 0.66);
+  color: rgba(16, 24, 26, 0.74);
   font-weight: 600;
 }
 
-/* Two thin strokes for the arrow, in ink rather than the browser's grey. Only
-   the closed control is reachable from CSS — the open list is drawn by the OS
-   and no stylesheet gets at it. */
+/* Two thin strokes for the arrow, in ink rather than the browser's grey, and
+   anchored to the bottom because the field is 44px tall but its text sits low.
+   Only the closed control is reachable from CSS — the open list is drawn by the
+   OS and no stylesheet gets at it. */
 .passport-field select {
   padding-right: 1.2rem;
   background-image: linear-gradient(45deg, transparent 50%, var(--ink) 50%),
     linear-gradient(135deg, var(--ink) 50%, transparent 50%);
-  /* Anchored to the bottom, not the top: the field is 44px tall for the thumb
-     but its text sits low, and a top-anchored arrow floats away from it. */
-  background-position: right 0.55rem bottom 0.85rem, right 0.25rem bottom 0.85rem;
+  background-position: right 0.55rem bottom 0.8rem, right 0.25rem bottom 0.8rem;
   background-size: 0.3rem 0.3rem, 0.3rem 0.3rem;
   background-repeat: no-repeat;
   cursor: pointer;
@@ -3650,11 +3867,14 @@ footer p:last-child {
 }
 
 .passport-rows span {
-  margin-bottom: 0.2rem;
+  margin-bottom: 0.15rem;
 }
 
+/* Uppercase like every other value on the document — a data page does not mix
+   sentence case into its fields. */
 .passport-rows strong {
   font-size: 0.72rem;
+  text-transform: uppercase;
   overflow-wrap: anywhere;
 }
 
@@ -3679,124 +3899,54 @@ footer p:last-child {
   text-transform: uppercase;
 }
 
-/* ---- Stamps ------------------------------------------------------------ */
+/* ---- The machine-readable zone ----------------------------------------- */
 
-.passport-stamps {
+/* ICAO 9303, at the foot of the data page where it belongs. The check digits
+   are really computed — see mrzLines() in app/journey.ts — so this stays true
+   as the miles and the tier move.
+
+   It must never wrap: an MRZ line is exactly 44 characters and a wrapped one is
+   nonsense. It scales down with the page instead, via the container query unit
+   below, and the whole strip is one flat block so it cannot reflow. */
+.passport-mrz {
+  container-type: inline-size;
   display: grid;
-  align-content: start;
-  gap: 0.6rem;
-}
-
-.passport-stamps-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.1rem;
   margin: 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px dashed rgba(16, 24, 26, 0.28);
+  margin-top: auto;
+  padding-top: 0.6rem;
+  border-top: 1px dashed rgba(16, 24, 26, 0.32);
 }
 
-.passport-stamps-head strong {
-  font-size: 0.72rem;
+/* 44 characters have to fit the page width exactly. At Geist Mono's 0.6em
+   advance plus this tracking, one line is ~28.5em wide — so 3.4cqi lands it
+   flush with a hair to spare, and the clamp only bites on a very narrow phone. */
+.passport-mrz span {
+  color: #10181a;
+  font-size: clamp(0.36rem, 3.4cqi, 0.74rem);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.55;
+  white-space: nowrap;
 }
 
-/* 3 across, 2 down — a stamp page, at every width. The document is portrait and
-   never reflows, so this does not need a breakpoint. */
-.passport-slots {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.45rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
+/* ---- Controls ---------------------------------------------------------- */
 
-.passport-slot {
-  display: grid;
-  place-content: center;
-  gap: 0.15rem;
-  min-height: 4rem;
-  padding: 0.4rem 0.3rem;
-  border: 1px dashed rgba(16, 24, 26, 0.3);
-  border-radius: 0.35rem;
-  text-align: center;
-}
-
-.passport-slot strong {
-  font-family: var(--font-geist-sans), sans-serif;
-  font-size: clamp(0.6rem, 2.6vw, 0.8rem);
-  font-weight: 800;
-  letter-spacing: -0.01em;
-  line-height: 1.05;
-  text-transform: uppercase;
-  /* A 14-character custom stamp wraps rather than escaping its slot. */
-  overflow-wrap: anywhere;
-}
-
-.passport-slot span {
-  color: rgba(16, 24, 26, 0.66);
-  font-size: 0.45rem;
-  font-weight: 750;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-/* Empty slots stay level. Only a struck stamp is crooked — the angle is what
-   says "somebody pressed this", and rotating the empties would just look like a
-   broken grid. */
-.passport-slot[data-stamped="true"] {
-  border-style: solid;
-  border-color: rgba(16, 24, 26, 0.5);
-  color: rgba(16, 24, 26, 0.72);
-  rotate: var(--angle, 0deg);
-}
-
-/* Deep red, the commonest ink in a real passport, and the one warm colour that
-   survives this background: 5.4:1 against the wash. */
-.passport-slot[data-newest="true"] {
-  border-color: #b23a22;
-  color: #b23a22;
-}
-
-/* Empty reads through the dashed border and the lighter ink, NOT through an
-   opacity on the whole slot. That was the first version and it multiplied with
-   every colour inside — "UNSTAMPED" landed near 1.9:1, unreadable. An empty
-   slot still has to say what it is waiting for. */
-.passport-slot[data-stamped="false"] strong {
-  color: rgba(16, 24, 26, 0.62);
-}
-
-/* ---- The strip --------------------------------------------------------- */
-
-.passport-strip {
+.passport-controls {
   display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  padding-top: 0.9rem;
-  border-top: 1px dashed rgba(16, 24, 26, 0.28);
-}
-
-.passport-creed {
-  color: rgba(16, 24, 26, 0.62);
-  font-size: 0.5rem;
-  font-weight: 750;
-  letter-spacing: 0.11em;
-  text-transform: uppercase;
+  justify-content: center;
 }
 
 .passport-flip-back {
   min-height: 2.75rem;
-  padding: 0.5rem 0.85rem;
-  color: var(--ink);
+  padding: 0.7rem 1.1rem;
+  color: var(--paper-bright);
   background: none;
-  border: 1px solid rgba(16, 24, 26, 0.4);
-  border-radius: 0.35rem;
+  border: 1px solid var(--white-line);
+  border-radius: 0.4rem;
   cursor: pointer;
   font: inherit;
-  font-size: 0.58rem;
+  font-size: 0.6rem;
   font-weight: 750;
   letter-spacing: 0.11em;
   text-transform: uppercase;
@@ -3804,13 +3954,33 @@ footer p:last-child {
 }
 
 .passport-flip-back:hover {
-  background: rgba(16, 24, 26, 0.08);
-  border-color: rgba(16, 24, 26, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.45);
 }
 
 .passport-flip-back:focus-visible {
   outline: 2px solid var(--orange);
   outline-offset: 2px;
+}
+
+/* ==========================================================================
+   ONE PAGE (phones) — the default above, made explicit here
+
+   Two pages on a 390px screen are two 160px pages, so a phone gets the leaf as
+   a plain card flip and the data page stacked underneath it once open.
+   ========================================================================== */
+
+.passport-page-data {
+  display: none;
+}
+
+.passport-book[data-open="true"] .passport-page-data {
+  display: block;
+  margin-top: 0.75rem;
+}
+
+.passport-book[data-open="true"] .passport-leaf {
+  transform: rotateY(180deg);
 }
 
 @media (min-width: 480px) {
@@ -3823,7 +3993,110 @@ footer p:last-child {
   }
 }
 
-/* Flat and instant. The tilt and the flip are both expressive rather than
+/* ==========================================================================
+   THE SPREAD (760px and up) — the book proper
+
+   The leaf is lifted out of the flow and laid over the data page, hinged on its
+   LEFT edge. Opening swings it a full 180deg, so it comes to rest exactly on
+   the left half with its inside face — the stamp page — toward the reader.
+
+   The book itself is two pages wide at all times. When it is shut it slides a
+   quarter of its own width to the right, which puts the closed cover in the
+   middle of the panel instead of stranding it in the right-hand half. Both are
+   transforms, so nothing here touches layout.
+   ========================================================================== */
+
+@media (min-width: 760px) {
+  .passport {
+    width: min(46rem, calc(100vw - 2rem));
+  }
+
+  .passport-book {
+    /* The spine runs down the centre; each page is half. */
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    transition: transform 700ms cubic-bezier(0.62, 0.02, 0.2, 1);
+    /* Shut: the cover sits centred. */
+    transform: translateX(-25%);
+  }
+
+  .passport-book[data-open="true"] {
+    transform: translateX(0);
+  }
+
+  .passport-leaf {
+    /* Out of the grid flow and over the data page, hinged at the spine. */
+    position: absolute;
+    inset: 0 0 0 50%;
+    z-index: 2;
+    transform-origin: left center;
+  }
+
+  .passport-book[data-open="true"] .passport-leaf {
+    transform: rotateY(-180deg);
+  }
+
+  .passport-page-data,
+  .passport-book[data-open="true"] .passport-page-data {
+    display: grid;
+    grid-column: 2;
+    margin-top: 0;
+  }
+
+  /* A page is 88 x 125mm. Holding the ratio is most of what makes this read as
+     a book rather than as two panels. */
+  .passport-page,
+  .passport-cover {
+    aspect-ratio: 88 / 125;
+  }
+
+  .passport-page {
+    padding: 1.15rem 1.05rem;
+  }
+
+  /* Square corners at the spine, rounded at the fore-edge — the same way a
+     bound book behaves. */
+  .passport-cover,
+  .passport-page-stamps {
+    border-radius: 0.35rem 0.75rem 0.75rem 0.35rem;
+  }
+
+  .passport-page-data {
+    border-radius: 0 0.75rem 0.75rem 0;
+  }
+
+  /* The gutter shadow. Pages nearest the spine sit deeper, and without this the
+     two halves read as two separate cards rather than one open book. */
+  .passport-page-data::after,
+  .passport-page-stamps::after {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2.25rem;
+    content: "";
+    pointer-events: none;
+  }
+
+  .passport-page-data::after {
+    left: 0;
+    background: linear-gradient(90deg, rgba(16, 24, 26, 0.19), transparent);
+  }
+
+  .passport-page-stamps::after {
+    right: 0;
+    background: linear-gradient(270deg, rgba(16, 24, 26, 0.15), transparent);
+  }
+
+  .passport-slots {
+    gap: 0.5rem 0.35rem;
+  }
+
+  .passport-stamp {
+    max-width: 6.4rem;
+  }
+}
+
+/* Flat and instant. The tilt and the hinge are both expressive rather than
    informational, so there is nothing to preserve in a reduced form. */
 @media (prefers-reduced-motion: reduce) {
   .passport-tilt {
@@ -3831,7 +4104,8 @@ footer p:last-child {
     transition: none;
   }
 
-  .passport-book {
+  .passport-book,
+  .passport-leaf {
     transition: none;
   }
 

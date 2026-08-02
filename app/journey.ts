@@ -151,6 +151,70 @@ export function formatStampDate(iso: string): string {
   return `${day} ${MONTHS[date.getMonth()]} ${String(date.getFullYear()).slice(2)}`;
 }
 
+/* ---- The machine-readable zone ----------------------------------------- */
+
+/*
+   ICAO 9303, the two-line strip across the foot of every passport data page.
+   The layout is a public standard, and building ours to it means the check
+   digits are really computed rather than drawn — so the strip stays true as the
+   miles and the tier move, instead of being a decorative squiggle that lies the
+   moment anything changes.
+
+   One knowing inaccuracy: the real spec wants a 3-letter country code and we
+   store alpha-2, so TH is padded to `TH<` rather than reading `THA`. Correcting
+   it means shipping a 250-row alpha-2 → alpha-3 table for one cosmetic line.
+   Swap it in here if that ever feels worth ~1KB.
+*/
+
+const MRZ_LEN = 44;
+
+/** A=10 … Z=35, digits are themselves, filler is 0. */
+function mrzValue(ch: string): number {
+  if (ch >= "0" && ch <= "9") return ch.charCodeAt(0) - 48;
+  if (ch >= "A" && ch <= "Z") return ch.charCodeAt(0) - 55;
+  return 0;
+}
+
+/** The 7-3-1 weighted modulus the spec uses for every check digit. */
+function checkDigit(field: string): string {
+  const weights = [7, 3, 1];
+  let sum = 0;
+  for (let i = 0; i < field.length; i++) sum += mrzValue(field[i]) * weights[i % 3];
+  return String(sum % 10);
+}
+
+/** Anything not A–Z or 0–9 becomes the filler character, as the spec requires. */
+function mrzText(raw: string): string {
+  return raw.toUpperCase().replace(/[^A-Z0-9]+/g, "<");
+}
+
+const fill = (value: string, length: number) => value.slice(0, length).padEnd(length, "<");
+
+export function mrzLines(journey: Journey): [string, string] {
+  const holder = mrzText(journey.holder.trim()) || "BEARER<UNKNOWN";
+  const line1 = fill(`P<BBP${holder}`, MRZ_LEN);
+
+  const docNo = fill(journey.passportNo, 9);
+  const docCheck = checkDigit(docNo);
+  const nation = fill(journey.nationality, 3);
+
+  const issued = journey.issued ? new Date(journey.issued) : null;
+  const date = issued
+    ? `${String(issued.getFullYear()).slice(2)}${String(issued.getMonth() + 1).padStart(2, "0")}${String(issued.getDate()).padStart(2, "0")}`
+    : "<<<<<<";
+  const dateCheck = checkDigit(date);
+
+  const tier = fill(mrzText(tierFor(journey.miles)), 14);
+  const miles = String(Math.min(journey.miles, 999999)).padStart(6, "0");
+
+  const body = `${docNo}${docCheck}${nation}${date}${dateCheck}${tier}${miles}`;
+  // The spec's composite digit runs over the document, date and optional-data
+  // fields. Same idea here, over everything this passport actually holds.
+  const line2 = fill(`${body}<<<${checkDigit(body)}`, MRZ_LEN);
+
+  return [line1, line2];
+}
+
 /**
  * ISO 3166-1 alpha-2. Only the codes ship — Intl.DisplayNames turns them into
  * names in the browser's own language, so this is ~750 bytes instead of a

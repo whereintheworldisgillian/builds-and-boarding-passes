@@ -353,7 +353,51 @@ the store is module-level with `subscribe`/`getSnapshot` read through
 dialogs are separate client islands under it, so a provider would mean wrapping
 the page and giving up static rendering.
 
-Five things that are load-bearing:
+### It opens like a book
+
+The physics are the real ones. **The cover is hinged on its left edge and swings
+a full 180°, so the surface you read on the left IS the back of the cover** —
+which is why the stamp page lives *inside* the cover element rather than beside
+it. Trying to reveal a separate left page underneath cannot work: the cover
+lands on top of it.
+
+Shut, the book slides a quarter of its own width to the right so the cover sits
+centred in the panel instead of stranded in the right-hand half. Both that and
+the hinge are transforms, so nothing here touches layout.
+
+**Desktop only, from 760px.** Two pages on a 390px screen are two 160px pages.
+Phones keep the single-page card flip with the data page stacked underneath.
+
+### The security paper
+
+Three layers, and **only two of them tile**:
+
+1. A fine wavy line field (the base).
+2. A microprint band carrying the project's name.
+3. **One** large guilloche rosette per page, centred, never repeated.
+
+**Do not tile the rosette.** Two attempts did and both failed the same way: a
+hypotrochoid is hollow in the middle, so repeating it prints a regular grid of
+pale discs and the page reads as polka-dot wallpaper. Filling the centres with
+smaller rosettes did not rescue it either — density still peaks and troughs on
+the tile's rhythm. A real data page is a line field with one rosette over it.
+
+**The pattern darkens the paper, which costs dark text contrast rather than
+helping it.** Every muted ink went 0.66 → 0.74 and the stamp red went `#B23A22`
+→ `#9E3320` when the guilloche landed, because against a fully-inked pixel the
+old values measured 4.09:1 and 2.82:1 — both under their bar. Measure against
+the pattern, not the wash, and re-measure if its opacity ever goes back up.
+
+### The MRZ
+
+ICAO 9303, at the foot of the data page. **The check digits are really
+computed** — see `mrzLines()` — so the strip stays true as the miles and tier
+move instead of being a squiggle that lies the moment anything changes. Both
+lines are exactly 44 characters and must never wrap; they scale with the page
+via `cqi` instead. One knowing inaccuracy is commented there: the spec wants a
+3-letter country code and we store alpha-2.
+
+Six things that are load-bearing:
 
 - **`--orange` is banned inside the passport.** It measures **2.3:1** on this
   stock and fails even the large-text bar. The newest stamp carries `#B23A22`
@@ -362,22 +406,30 @@ Five things that are load-bearing:
   0.55 both measured under 4.5.
 - **Empty stamp slots are not dimmed with `opacity`.** That was the first version
   and it multiplied with every colour inside, landing "UNSTAMPED" near 1.9:1.
-  Empty reads through the dashed border and a lighter ink instead.
-- **The document is portrait at every width, and never reflows.** Both faces
-  share one grid cell so the container is as tall as the taller of them — which
-  is what makes the cover page-sized without a fixed height. A two-page landscape
-  spread was the first plan, and it forced a landscape *cover*.
+  Only the ring fades now; the words keep full ink.
+- **Pages hold 88 × 125mm.** Holding the ratio is most of what makes this read as
+  a book rather than as two panels.
 - **The face turned away is `inert`.** `backface-visibility` hides it from the
   eye but not from the tab order, so without that the holder field is reachable
   straight through a closed cover.
-- **Focus is moved into the dialog by hand on open.** Every control on the back
-  face is inert and the front face has no autofocus, so the browser leaves focus
-  on `<body>` — which also swallows Escape, since there is nothing inside the
-  dialog for the close request to reach. A button either way, never the holder
-  field: focusing a text input on open throws up the keyboard on a phone.
+- **Focus is moved by hand, from an effect — never from the click handler.**
+  A `setTimeout(…, 0)` beside `setOpen` fires *before* React commits, so the face
+  being turned toward the reader is still inert, and `focus()` on an inert
+  element does nothing at all, silently. Focus fell to `<body>`, which also
+  swallows Escape. The effect on `open` runs after the commit, when the inert
+  flags match what is on screen.
+- **A button is always the focus target, never the holder field** — focusing a
+  text input throws up the keyboard on a phone before anyone asked to type.
 
-The emblem is CSS only — a masked `repeating-conic-gradient` tick ring inside two
-dashed circles, with the hero's own `✈` at its 12°. No image, painted once.
+**Stamps are circular, and the arcs carry only fixed text.** Text on a path
+cannot wrap or shrink, and `DEBUGGING` alone already crowds a ring that size — a
+14-character custom stamp would run right around it. So the curve gets the two
+strings that never change and the visitor's word sits flat in the middle as
+ordinary HTML, free to wrap and size itself down. One shared `feTurbulence`
+roughens every strike; it is static, painted once, never animated.
+
+The cover emblem is CSS only — a masked `repeating-conic-gradient` tick ring
+inside two dashed circles, with the hero's own `✈` at its 12°. No image.
 
 ### Keyboard
 
